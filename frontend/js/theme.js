@@ -134,13 +134,11 @@ export function initializeTheme() {
     const theme = getCurrentTheme();
     applyTheme(theme);
 
-    // Listen for system theme changes
+    // Listen for system theme changes - always respect system preference as requested
     if (window.matchMedia) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-            // Only auto-apply if user hasn't manually set a preference
-            if (!localStorage.getItem(STORAGE_KEY)) {
-                applyTheme(e.matches ? 'dark' : 'light');
-            }
+            // Always apply system preference to respect user's system setting
+            applyTheme(e.matches ? 'dark' : 'light');
         });
     }
 }

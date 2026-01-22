@@ -444,13 +444,19 @@ class SpaceVisualization {
 
         starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
 
+        // Get theme-aware starfield color
+        const starColor = this.getStarfieldColor();
+
         const starMaterial = new THREE.PointsMaterial({
-            color: this.colors.STARFIELD_COLOR,
+            color: starColor,
             size: VISUAL_EFFECTS.STARFIELD_PARTICLE_SIZE,
-            sizeAttenuation: true
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.8,
         });
 
         this.stars = new THREE.Points(starGeometry, starMaterial);
+        this.stars.frustumCulled = false; // Prevent clipping at edges
         this.scene.add(this.stars);
     }
 
@@ -856,6 +862,21 @@ class SpaceVisualization {
         this.renderer.setSize(this.width, this.height);
     }
 
+    getStarfieldColor() {
+        // Get current theme to determine starfield color
+        const theme = localStorage.getItem('theme-preference') ||
+                     (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+        // In dark mode, show bright stars; in light mode, show nebula-like particles
+        if (theme === 'dark') {
+            return 0xffffff; // Bright white stars for dark mode
+        } else {
+            // For light mode, create a subtle nebula effect with soft purples/blues
+            // Using a soft purple/magenta that will contrast nicely with the light background
+            return 0x9966cc; // Soft purple for light mode nebula effect
+        }
+    }
+
     updateTheme() {
         // Update theme-aware colors
         this.colors = getThemeColors();
@@ -863,6 +884,12 @@ class SpaceVisualization {
         // Update scene background and fog
         this.scene.background.setHex(this.colors.BACKGROUND);
         this.scene.fog.color.setHex(this.colors.BACKGROUND);
+
+        // Update starfield color based on theme
+        if (this.stars && this.stars.material) {
+            this.stars.material.color.setHex(this.getStarfieldColor());
+            this.stars.material.needsUpdate = true;
+        }
 
         // Note: Other materials (planets, trails, etc.) will remain with their original colors
         // Only background and orbit lines that use DEFAULT_ORBIT_COLOR will update
