@@ -186,7 +186,9 @@ async function generateSystem() {
             : {}
         );
       } catch (error) {
-        setBrowserStatus("error", "Browser inference failed");
+        const message = error && error.message ? error.message : "Browser inference failed";
+        console.error("Browser inference failed:", error);
+        setBrowserStatus("error", message);
         return;
       }
     } else {
@@ -280,6 +282,7 @@ function setBrowserStatus(state, message) {
     statusEl.classList.add(state);
   }
   statusEl.textContent = message;
+  statusEl.title = message;
 }
 
 async function warmBrowserModel() {
@@ -293,7 +296,9 @@ async function warmBrowserModel() {
     setBrowserStatus("ready", "Ready");
   } catch (error) {
     browserReady = false;
-    setBrowserStatus("error", "Model unavailable");
+    const message = error && error.message ? error.message : "Model unavailable";
+    console.error("Model load failed:", error);
+    setBrowserStatus("error", message);
     throw error;
   }
 }

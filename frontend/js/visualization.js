@@ -506,8 +506,8 @@ class SpaceVisualization {
 
         // Material with emission
         const material = new THREE.MeshPhongMaterial({
-            color: COLORS.STAR_LIGHT,
-            emissive: COLORS.STAR_LIGHT,
+            color: this.colors.STAR_LIGHT,
+            emissive: this.colors.STAR_LIGHT,
             emissiveIntensity: MATERIAL.STAR_EMISSIVE_INTENSITY,
             shininess: MATERIAL.STAR_SHININESS
         });
