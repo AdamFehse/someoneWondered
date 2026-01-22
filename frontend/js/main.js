@@ -50,6 +50,13 @@ async function generateSystem() {
   generateBtn.disabled = true;
   generateBtn.textContent = "Generating...";
 
+  // Start elapsed time counter
+  const startTime = Date.now();
+  const timerInterval = setInterval(() => {
+    const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+    generateBtn.textContent = `Generating... ${elapsedSeconds}s`;
+  }, 1000);
+
   try {
     // Get parameters from UI
     const centralMass = parseFloat(document.getElementById("central-mass").value);
@@ -78,6 +85,9 @@ async function generateSystem() {
     // Update info panel
     updateInfoPanel(systemData);
   } finally {
+    // Clear timer
+    clearInterval(timerInterval);
+
     // Re-enable button
     generateBtn.disabled = false;
     generateBtn.textContent = originalText;
