@@ -43,32 +43,45 @@ function setupEventListeners() {
 }
 
 async function generateSystem() {
-  // Get parameters from UI
-  const centralMass = parseFloat(document.getElementById("central-mass").value);
-  const numBodies = parseInt(document.getElementById("num-bodies").value);
-  const temperature = parseFloat(document.getElementById("temperature").value);
+  const generateBtn = document.getElementById("generate-btn");
+  const originalText = generateBtn.textContent;
 
-  const safeCentralMass = Math.max(centralMass, 0.01);
-  const simulationDt = 0.01 * (0.2 / safeCentralMass);
+  // Disable button and show loading state
+  generateBtn.disabled = true;
+  generateBtn.textContent = "Generating...";
 
-  // Generate system
-  const systemData = await api.generateSystem({
-    central_mass: centralMass,
-    num_bodies: numBodies,
-    temperature: temperature,
-    simulation_timesteps: 1000,
-    simulation_dt: simulationDt,
-  });
+  try {
+    // Get parameters from UI
+    const centralMass = parseFloat(document.getElementById("central-mass").value);
+    const numBodies = parseInt(document.getElementById("num-bodies").value);
+    const temperature = parseFloat(document.getElementById("temperature").value);
 
-  // Load into visualization
-  visualization.loadSystem(systemData);
+    const safeCentralMass = Math.max(centralMass, 0.01);
+    const simulationDt = 0.01 * (0.2 / safeCentralMass);
 
-  if (systemData.orbital_elements) {
-    console.table(systemData.orbital_elements);
+    // Generate system
+    const systemData = await api.generateSystem({
+      central_mass: centralMass,
+      num_bodies: numBodies,
+      temperature: temperature,
+      simulation_timesteps: 1000,
+      simulation_dt: simulationDt,
+    });
+
+    // Load into visualization
+    visualization.loadSystem(systemData);
+
+    if (systemData.orbital_elements) {
+      console.table(systemData.orbital_elements);
+    }
+
+    // Update info panel
+    updateInfoPanel(systemData);
+  } finally {
+    // Re-enable button
+    generateBtn.disabled = false;
+    generateBtn.textContent = originalText;
   }
-
-  // Update info panel
-  updateInfoPanel(systemData);
 }
 
 function updateInfoPanel(systemData) {

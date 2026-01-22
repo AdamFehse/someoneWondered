@@ -177,6 +177,17 @@
             transform: translateY(0);
         }
 
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        button:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
         button.secondary {
             background: var(--secondary-bg);
         }
