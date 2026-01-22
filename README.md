@@ -2,9 +2,7 @@
 
 AI-driven stellar system generation & N-body physics simulation with 3D visualization. The model can generate systems with planetary masses all the way down to tiny asteroid-like objects (0.0001) up to gas giants and brown dwarfs (100,000 Earth masses). That huge range is because real exoplanet data spans everything from sub-Earth planets to super-Jupiters, so the model learned that full spectrum of possibilities.  
 
-## TL;DR
-
-## [**Demo**:](https://adamfehse.github.io/someoneWondered/)
+## TL;DR [**Demo**](https://adamfehse.github.io/someoneWondered/)
 
 **Tech**: Transformer (RoPE, AdamW, cosine annealing) (PyTorch) + FastAPI + Three.js
 
