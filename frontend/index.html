@@ -12,7 +12,7 @@
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-primary: #000510;
-                --bg-secondary: rgba(0, 5, 16, 0.8);
+                --bg-secondary: rgba(0, 5, 16, 0.2);
                 --text-primary: #e0e0e0;
                 --text-secondary: #9090a0;
                 --border-accent: rgba(0, 170, 255, 0.2);
@@ -33,7 +33,7 @@
         @media (prefers-color-scheme: light) {
             :root {
                 --bg-primary: #ffffff;
-                --bg-secondary: rgba(255, 255, 255, 0.9);
+                --bg-secondary: rgba(255, 255, 255, 0.2);
                 --text-primary: #1a1a1a;
                 --text-secondary: #666666;
                 --border-accent: rgba(0, 170, 255, 0.15);
@@ -77,9 +77,9 @@
             position: fixed;
             top: 20px;
             left: 20px;
-            right: 20px;
             z-index: 100;
-            max-width: 500px;
+            width: fit-content;
+            max-width: calc(100vw - 40px);
         }
 
         .header {
@@ -113,6 +113,8 @@
             border-radius: 12px;
             border: 1px solid var(--border-accent);
             margin-bottom: 20px;
+            position: relative;
+            min-width: 250px;
         }
 
         .control-group {
@@ -206,8 +208,13 @@
             border-radius: 8px;
             border: 1px solid var(--error-border);
             font-size: 12px;
-            max-width: 300px;
+            width: 300px;
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: hidden;
             z-index: 100;
+            display: flex;
+            flex-direction: column;
         }
 
         .info-title {
@@ -226,6 +233,84 @@
             color: var(--text-secondary);
         }
 
+        .selection-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .selection-section.visible {
+            max-height: 500px;
+            opacity: 1;
+            margin-top: 12px;
+        }
+
+        .selection-section.hidden {
+            max-height: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .selection-divider {
+            height: 1px;
+            background: var(--border-accent);
+            margin-bottom: 12px;
+        }
+
+        .selection-title {
+            color: var(--accent-color);
+            margin-bottom: 8px;
+        }
+
+        .deselect-btn {
+            width: 100%;
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: var(--accent-color);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .deselect-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        .deselect-btn:active {
+            transform: translateY(0);
+        }
+
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            cursor: nwse-resize;
+            background: linear-gradient(135deg, transparent 55%, var(--accent-color) 55%);
+            border-radius: 0 0 12px 0;
+            opacity: 0.2;
+            transition: opacity 0.2s;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .control-panel:hover .resize-handle,
+        #info-panel:hover .resize-handle {
+            opacity: 0.5;
+        }
+
+        .resize-handle:hover {
+            opacity: 1 !important;
+            background: linear-gradient(135deg, transparent 55%, #00ffff 55%);
+        }
+
     </style>
 </head>
 <body>
@@ -237,10 +322,10 @@
             <p>AI-driven stellar system generation & N-body physics</p>
         </div>
 
-        <div class="control-panel">
+        <div id="control-panel" class="control-panel">
             <div class="control-group">
                 <label for="central-mass">Central Mass (normalized 0-1)</label>
-                <input type="number" id="central-mass" step="0.1" value="0.2">
+                <input type="number" id="central-mass" step="0.1" value="0.1">
             </div>
 
             <div class="control-group">
@@ -250,10 +335,10 @@
                     <option value="2">2 Planets</option>
                     <option value="3">3 Planets</option>
                     <option value="4">4 Planets</option>
-                    <option value="5" selected>5 Planets</option>
+                    <option value="5">5 Planets</option>
                     <option value="6">6 Planets</option>
                     <option value="7">7 Planets</option>
-                    <option value="8">8 Planets</option>
+                    <option value="8" selected>8 Planets</option>
                 </select>
             </div>
 
@@ -265,6 +350,7 @@
                 <button id="generate-btn">Generate System</button>
                 <button id="pause-btn" class="secondary">Pause</button>
             </div>
+            <div class="resize-handle control-panel-resize"></div>
         </div>
     </div>
 
@@ -279,8 +365,38 @@
             <span id="info-planets">-</span>
         </div>
         <div class="info-item">
-            <span>Frame:</span> 
+            <span>Frame:</span>
             <span id="info-frame">-</span>
+        </div>
+
+        <div id="selection-section" class="selection-section hidden">
+            <div class="selection-divider"></div>
+            <div class="info-title selection-title">Selected Body</div>
+            <div class="info-item">
+                <span>Name:</span>
+                <span id="selection-name">-</span>
+            </div>
+            <div class="info-item">
+                <span>Mass:</span>
+                <span id="selection-mass">-</span>
+            </div>
+            <div class="info-item">
+                <span>Semi-major Axis:</span>
+                <span id="selection-sma">-</span>
+            </div>
+            <div class="info-item">
+                <span>Eccentricity:</span>
+                <span id="selection-ecc">-</span>
+            </div>
+            <div class="info-item">
+                <span>Inclination:</span>
+                <span id="selection-inc">-</span>
+            </div>
+            <div class="info-item">
+                <span>Period:</span>
+                <span id="selection-period">-</span>
+            </div>
+            <button id="deselect-btn" class="deselect-btn">Deselect</button>
         </div>
     </div>
 
@@ -288,8 +404,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <!-- Application Scripts -->
-    <script src="js/api.js?v=1"></script>
-    <script src="js/visualization.js?v=1"></script>
-    <script src="js/main.js?v=1"></script>
+    <script type="module" src="js/main.js?v=1"></script>
 </body>
 </html>

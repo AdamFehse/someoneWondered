@@ -1,6 +1,9 @@
 /**
  * Main Application Logic
  */
+import { UI, PHYSICS, ANIMATION } from './constants.js';
+import { SpaceSimulationAPI } from './api.js';
+import { SpaceVisualization } from './visualization.js';
 
 // Global state
 let visualization = null;
@@ -40,6 +43,63 @@ function setupEventListeners() {
       document.getElementById("pause-btn").textContent = "Pause";
     }
   });
+
+  // Panel resize handle
+  setupPanelResize("control-panel");
+}
+
+function setupPanelResize(panelId) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+
+  const resizeHandle = panel.querySelector(".resize-handle");
+  if (!resizeHandle) return;
+
+  // Set initial width if not already set
+  if (!panel.style.width) {
+    panel.style.width = panelId === "control-panel" ? UI.CONTROL_PANEL_WIDTH + "px" : UI.INFO_PANEL_WIDTH + "px";
+  }
+
+  let isResizing = false;
+  let startX, startY, startWidth, startHeight;
+
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return; // Only left mouse button
+    isResizing = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startWidth = panel.offsetWidth;
+    startHeight = panel.offsetHeight;
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "nwse-resize";
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isResizing) return;
+
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+
+    const newWidth = Math.max(UI.MIN_PANEL_WIDTH, startWidth + deltaX);
+    const newHeight = Math.max(UI.MIN_PANEL_HEIGHT, startHeight + deltaY);
+
+    panel.style.width = newWidth + "px";
+    if (panelId === "info-panel") {
+      panel.style.maxHeight = newHeight + "px";
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isResizing) {
+      isResizing = false;
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+    }
+  };
+
+  resizeHandle.addEventListener("mousedown", handleMouseDown);
+  document.addEventListener("mousemove", handleMouseMove);
+  document.addEventListener("mouseup", handleMouseUp);
 }
 
 async function generateSystem() {
@@ -63,24 +123,23 @@ async function generateSystem() {
     const numBodies = parseInt(document.getElementById("num-bodies").value);
     const temperature = parseFloat(document.getElementById("temperature").value);
 
-    const safeCentralMass = Math.max(centralMass, 0.01);
-    const simulationDt = 0.01 * (0.2 / safeCentralMass);
+    const safeCentralMass = Math.max(centralMass, PHYSICS.CENTRAL_MASS_MIN);
+    const simulationDt = PHYSICS.SIMULATION_DT_DEFAULT * (PHYSICS.MASS_RATIO / safeCentralMass);
 
     // Generate system
     const systemData = await api.generateSystem({
       central_mass: centralMass,
       num_bodies: numBodies,
       temperature: temperature,
-      simulation_timesteps: 1000,
+      simulation_timesteps: PHYSICS.SIMULATION_TIMESTEPS,
       simulation_dt: simulationDt,
     });
 
-    // Load into visualization
+    // Load into visualization (includes orbital_elements)
     visualization.loadSystem(systemData);
 
-    if (systemData.orbital_elements) {
-      console.table(systemData.orbital_elements);
-    }
+    // Update pause button state (loadSystem sets isPlaying = true)
+    document.getElementById("pause-btn").textContent = "Pause";
 
     // Update info panel
     updateInfoPanel(systemData);
@@ -112,4 +171,4 @@ setInterval(() => {
     document.getElementById("info-frame").textContent =
       `${visualization.currentFrame} / ${visualization.trajectories.length} (${progress}%)`;
   }
-}, 100);
+}, ANIMATION.TIMER_INTERVAL);
