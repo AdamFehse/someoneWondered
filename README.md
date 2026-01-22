@@ -6,13 +6,27 @@ AI-driven stellar system generation & N-body physics simulation with 3D visualiz
 
 ## TL;DR 
 
+**~1.25M parameter model**
 **Tech**: Transformer (RoPE, AdamW, cosine annealing) (PyTorch) + FastAPI + Three.js
-
-**Backend**: Render
+**Backend**: Render or browser
 - **Data**: ~6,080 real exoplanets from NASA Exoplanet Archive
 - **Model**: Decoder-only transformer (6 layers, 4 heads, RoPE embeddings)
 - **Task**: Autoregressive generation of exoplanet orbital parameters
 - **Application**: Generate planetary systems for stars like Vega
+
+## Browser Inference (ONNX + WASM)
+
+The "Zero-Server" Loop 
+- The Model: 1.25M parameters, optimized to 5MB ONNX (FP16). Small enough to cache in the browser’s IndexedDB.
+- The Runtime: onnxruntime-web + WASM SIMD. No GPU required for sub-second response times.
+- The Flow:Input: User sets system parameters (Central Mass, Planet Count).
+- Inference: Transformer generates a "Token Sequence" autoregressively (2-3s).
+- De-Quantize: normalization_stats.json maps tokens $\rightarrow$ actual Orbital Elements (Mass, SMA, Eccentricity).
+- Physics: Hand-off to a lightweight Keplerian WASM engine for instant 3D rendering.
+
+Everything happens client‑side
+
+Same model, same tokenization, same output format as render backend version using python and torch just executed in the browser with a simpler physics step.
 
 ---
 
@@ -62,7 +76,7 @@ Layer norm + output projection: (batch, 64, 256)
 - Optimizer: AdamW (lr=1e-4, weight decay=0.01)
 - Scheduler: CosineAnnealingLR (cosine decay over epochs)
 - Gradient clipping: 1.0
-- Batch size: 32 (configurable)
+- Epochs: 50
 
 **Validation**: 90/10 train/val split, checkpoint best model on val loss
 

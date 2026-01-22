@@ -151,6 +151,52 @@
             background: rgba(0, 170, 255, 0.05);
         }
 
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .toggle-row input {
+            accent-color: var(--accent-color);
+        }
+
+        .status-pill {
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--border-accent);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .status-pill.loading {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .status-pill.ready {
+            border-color: var(--accent-light);
+            color: var(--accent-light);
+        }
+
+        .status-pill.error {
+            border-color: var(--error-primary);
+            color: var(--error-primary);
+        }
+
         .button-group {
             display: flex;
             gap: 10px;
@@ -347,6 +393,21 @@
                 <label for="temperature">Generation Temperature</label>
                 <input type="number" id="temperature" step="0.1" value="0.67">
             </div>
+            <div class="control-group">
+                <label for="inference-mode">Inference Mode</label>
+                <select id="inference-mode">
+                    <option value="server" selected>Server (Render)</option>
+                    <option value="browser">Browser (ONNX/WASM)</option>
+                </select>
+                <div class="status-row">
+                    <span>Model</span>
+                    <span id="browser-model-status" class="status-pill">Not Loaded</span>
+                </div>
+                <label class="toggle-row" for="stream-results">
+                    <input type="checkbox" id="stream-results" checked>
+                    <span>Stream planets as they generate</span>
+                </label>
+            </div>
             <div class="button-group">
                 <button id="generate-btn">Generate System</button>
                 <button id="pause-btn" class="secondary">Pause</button>
@@ -368,6 +429,10 @@
         <div class="info-item">
             <span>Frame:</span>
             <span id="info-frame">-</span>
+        </div>
+        <div class="info-item">
+            <span>Inference:</span>
+            <span id="info-inference">Server (Render)</span>
         </div>
 
         <div id="selection-section" class="selection-section hidden">
@@ -403,6 +468,7 @@
 
     <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/ort.min.js"></script>
 
     <!-- Application Scripts -->
     <script type="module" src="./js/main.js?v=1"></script>

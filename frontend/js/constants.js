@@ -145,3 +145,17 @@ export const API_DEFAULTS = {
     SIMULATION_TIMESTEPS: 1000,
     SIMULATION_DT: 0.01
 };
+
+// Browser inference settings
+export const INFERENCE = {
+    VOCAB_SIZE: 256,
+    MAX_SEQ_LEN: 64,
+    NUM_BINS: 253,
+    OFFSET: 3
+};
+
+export const MODEL = {
+    ONNX_MODEL_URL: "./assets/planet_model.onnx",
+    STATS_URL: "./assets/normalization_stats.json",
+    WASM_BASE_URL: "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/"
+};

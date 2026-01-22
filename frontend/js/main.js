@@ -1,18 +1,22 @@
 /**
  * Main Application Logic
  */
-import { UI, PHYSICS, ANIMATION } from './constants.js';
+import { UI, PHYSICS, ANIMATION, API_DEFAULTS } from './constants.js';
 import { SpaceSimulationAPI } from './api.js';
 import { SpaceVisualization } from './visualization.js';
+import { BrowserInference } from './browser_inference.js';
 
 // Global state
 let visualization = null;
 let api = null;
+let browserInference = null;
+let browserReady = false;
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", async () => {
   // Initialize API (auto-detects environment: localhost for dev, Render for production)
   api = new SpaceSimulationAPI();
+  browserInference = new BrowserInference();
 
   // Initialize visualization
   visualization = new SpaceVisualization("canvas-container");
@@ -32,6 +36,16 @@ function setupEventListeners() {
     .addEventListener("click", async () => {
       await generateSystem();
     });
+
+  const inferenceSelect = document.getElementById("inference-mode");
+  if (inferenceSelect) {
+    inferenceSelect.addEventListener("change", async () => {
+      if (inferenceSelect.value === "browser") {
+        await warmBrowserModel();
+      }
+      updateInferenceInfo();
+    });
+  }
 
   // Pause button
   document.getElementById("pause-btn").addEventListener("click", () => {
@@ -105,6 +119,7 @@ function setupPanelResize(panelId) {
 async function generateSystem() {
   const generateBtn = document.getElementById("generate-btn");
   const originalText = generateBtn.textContent;
+  let progressLabel = "";
 
   // Disable button and show loading state
   generateBtn.disabled = true;
@@ -114,7 +129,8 @@ async function generateSystem() {
   const startTime = Date.now();
   const timerInterval = setInterval(() => {
     const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-    generateBtn.textContent = `Generating... ${elapsedSeconds}s`;
+    const suffix = progressLabel ? ` ${progressLabel}` : "";
+    generateBtn.textContent = `Generating...${suffix} ${elapsedSeconds}s`;
   }, 1000);
 
   try {
@@ -126,14 +142,52 @@ async function generateSystem() {
     const safeCentralMass = Math.max(centralMass, PHYSICS.CENTRAL_MASS_MIN);
     const simulationDt = PHYSICS.SIMULATION_DT_DEFAULT * (PHYSICS.MASS_RATIO / safeCentralMass);
 
-    // Generate system
-    const systemData = await api.generateSystem({
-      central_mass: centralMass,
-      num_bodies: numBodies,
-      temperature: temperature,
-      simulation_timesteps: PHYSICS.SIMULATION_TIMESTEPS,
-      simulation_dt: simulationDt,
-    });
+    const inferenceMode = getInferenceMode();
+    let systemData;
+
+    if (inferenceMode === "browser") {
+      try {
+        await warmBrowserModel();
+        const streamResults = getStreamResults();
+        systemData = await browserInference.generateSystem(
+          {
+            central_mass: centralMass,
+            num_bodies: numBodies,
+            temperature: temperature,
+            top_k: API_DEFAULTS.TOP_K,
+            simulation_timesteps: PHYSICS.SIMULATION_TIMESTEPS,
+            simulation_dt: simulationDt
+          },
+          streamResults
+            ? {
+                onProgress: async (partialSystem, progress) => {
+                  progressLabel = `${progress.completedPlanets}/${progress.totalPlanets}`;
+                  visualization.loadSystem(partialSystem);
+                  updateInfoPanel(partialSystem);
+                }
+              }
+            : {}
+        );
+      } catch (error) {
+        setBrowserStatus("error", "Browser inference failed");
+        setInferenceMode("server");
+        systemData = await api.generateSystem({
+          central_mass: centralMass,
+          num_bodies: numBodies,
+          temperature: temperature,
+          simulation_timesteps: PHYSICS.SIMULATION_TIMESTEPS,
+          simulation_dt: simulationDt
+        });
+      }
+    } else {
+      systemData = await api.generateSystem({
+        central_mass: centralMass,
+        num_bodies: numBodies,
+        temperature: temperature,
+        simulation_timesteps: PHYSICS.SIMULATION_TIMESTEPS,
+        simulation_dt: simulationDt
+      });
+    }
 
     // Load into visualization (includes orbital_elements)
     visualization.loadSystem(systemData);
@@ -159,6 +213,7 @@ function updateInfoPanel(systemData) {
   document.getElementById("info-planets").textContent =
     Math.max(0, systemData.bodies.length - 1);
   document.getElementById("info-frame").textContent = "-";
+  updateInferenceInfo();
 }
 
 // Update frame counter periodically
@@ -172,3 +227,55 @@ setInterval(() => {
       `${visualization.currentFrame} / ${visualization.trajectories.length} (${progress}%)`;
   }
 }, ANIMATION.TIMER_INTERVAL);
+
+function getInferenceMode() {
+  const select = document.getElementById("inference-mode");
+  return select ? select.value : "server";
+}
+
+function setInferenceMode(mode) {
+  const select = document.getElementById("inference-mode");
+  if (select) {
+    select.value = mode;
+  }
+  updateInferenceInfo();
+}
+
+function updateInferenceInfo() {
+  const mode = getInferenceMode();
+  const infoEl = document.getElementById("info-inference");
+  if (infoEl) {
+    infoEl.textContent = mode === "browser" ? "Browser (ONNX)" : "Server (Render)";
+  }
+}
+
+function getStreamResults() {
+  const checkbox = document.getElementById("stream-results");
+  return checkbox ? checkbox.checked : false;
+}
+
+function setBrowserStatus(state, message) {
+  const statusEl = document.getElementById("browser-model-status");
+  if (!statusEl) return;
+  statusEl.classList.remove("ready", "loading", "error");
+  if (state) {
+    statusEl.classList.add(state);
+  }
+  statusEl.textContent = message;
+}
+
+async function warmBrowserModel() {
+  if (browserReady) {
+    return;
+  }
+  setBrowserStatus("loading", "Loading model...");
+  try {
+    await browserInference.init();
+    browserReady = true;
+    setBrowserStatus("ready", "Ready");
+  } catch (error) {
+    browserReady = false;
+    setBrowserStatus("error", "Model unavailable");
+    throw error;
+  }
+}
