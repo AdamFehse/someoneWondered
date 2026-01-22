@@ -3,33 +3,63 @@
  * Centralizes all configuration values, colors, and magic numbers
  */
 
-// Color definitions
-export const COLORS = {
-    // Background and fog
-    BACKGROUND: 0x000510,
-    
-    // Lighting
-    AMBIENT_LIGHT: 0xffffff,
-    STAR_LIGHT: 0xffd700,
-    
-    // Default fallback colors
-    DEFAULT_ORBIT_COLOR: 0x00ffff,
-    
-    // Starfield
-    STARFIELD_COLOR: 0xffffff,
-    
-    // Planet color palette (no cyan or yellow as requested)
-    PLANET_PALETTE: [
-        0x4a90e2,  // Blue
-        0xff6b6b,  // Red
-        0x00cc88,  // Green
-        0xffa500,  // Orange
-        0xff69b4,  // Hot pink
-        0x9d4edd,  // Purple
-        0x50c878,  // Emerald green
-        0xd4af37,  // Gold
-    ]
-};
+// Color definitions (theme-aware)
+// Theme values are set in theme.js and this function retrieves them
+export function getThemeColors() {
+    // Import theme config dynamically to avoid circular dependencies
+    const getCanvasColor = (colorType) => {
+        // Try to get from theme system
+        try {
+            const theme = localStorage.getItem('theme-preference') === 'dark' ? 'dark' : 'light';
+            const THEME_CONFIG = {
+                dark: {
+                    'bg': 0x000510,
+                    'accent': 0x00aaff,
+                    'accent-light': 0x0088ff,
+                },
+                light: {
+                    'bg': 0xf5f7fa,
+                    'accent': 0x0066cc,
+                    'accent-light': 0x0055aa,
+                }
+            };
+            return THEME_CONFIG[theme][colorType];
+        } catch {
+            // Fallback to dark mode if theme system fails
+            return { 'bg': 0x000510, 'accent': 0x00aaff, 'accent-light': 0x0088ff }[colorType];
+        }
+    };
+
+    return {
+        // Background and fog (theme-aware)
+        BACKGROUND: getCanvasColor('bg'),
+
+        // Lighting
+        AMBIENT_LIGHT: 0xffffff,
+        STAR_LIGHT: 0xffd700,
+
+        // Default fallback colors (accent color changes with theme)
+        DEFAULT_ORBIT_COLOR: getCanvasColor('accent'),
+
+        // Starfield
+        STARFIELD_COLOR: 0xffffff,
+
+        // Planet color palette (consistent across themes)
+        PLANET_PALETTE: [
+            0x4a90e2,  // Blue
+            0xff6b6b,  // Red
+            0x00cc88,  // Green
+            0xffa500,  // Orange
+            0xff69b4,  // Hot pink
+            0x9d4edd,  // Purple
+            0x50c878,  // Emerald green
+            0xd4af37,  // Gold
+        ]
+    };
+}
+
+// Backward compatibility - default export for immediate use
+export const COLORS = getThemeColors();
 
 // Camera settings
 export const CAMERA = {

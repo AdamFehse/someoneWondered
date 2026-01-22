@@ -3,7 +3,7 @@
  *
  * Renders N-body system with orbital trails, bloom effects, and starfield
  */
-import { COLORS, CAMERA, LIGHTING, UI, ANIMATION, VISUAL_EFFECTS, GEOMETRY, MATERIAL, PHYSICS, INTERACTION, COLOR_EFFECTS } from './constants.js';
+import { getThemeColors, CAMERA, LIGHTING, UI, ANIMATION, VISUAL_EFFECTS, GEOMETRY, MATERIAL, PHYSICS, INTERACTION, COLOR_EFFECTS } from './constants.js';
 
 /**
  * Validates and sanitizes orbital element data
@@ -51,10 +51,13 @@ class SpaceVisualization {
         this.width = this.container.clientWidth;
         this.height = this.container.clientHeight;
 
+        // Get theme-aware colors
+        this.colors = getThemeColors();
+
         // Scene setup
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(COLORS.BACKGROUND);
-        this.scene.fog = new THREE.Fog(COLORS.BACKGROUND, LIGHTING.STAR_DISTANCE, PHYSICS.TARGET_VIEW_DISTANCE * 50);
+        this.scene.background = new THREE.Color(this.colors.BACKGROUND);
+        this.scene.fog = new THREE.Fog(this.colors.BACKGROUND, LIGHTING.STAR_DISTANCE, PHYSICS.TARGET_VIEW_DISTANCE * 50);
 
         // Camera setup
         this.camera = new THREE.PerspectiveCamera(
@@ -96,17 +99,20 @@ class SpaceVisualization {
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize());
 
+        // Listen for theme changes
+        window.addEventListener('themechange', () => this.updateTheme());
+
         // Animation
         this.animate();
     }
 
     setupLighting() {
         // Ambient light
-        const ambientLight = new THREE.AmbientLight(COLORS.AMBIENT_LIGHT, LIGHTING.AMBIENT_INTENSITY);
+        const ambientLight = new THREE.AmbientLight(this.colors.AMBIENT_LIGHT, LIGHTING.AMBIENT_INTENSITY);
         this.scene.add(ambientLight);
 
         // Point light from central star
-        this.starLight = new THREE.PointLight(COLORS.STAR_LIGHT, LIGHTING.STAR_INTENSITY, LIGHTING.STAR_DISTANCE);
+        this.starLight = new THREE.PointLight(this.colors.STAR_LIGHT, LIGHTING.STAR_INTENSITY, LIGHTING.STAR_DISTANCE);
         this.starLight.position.set(CAMERA.TARGET.x, CAMERA.TARGET.y, CAMERA.TARGET.z);
         this.starLight.castShadow = true;
         this.starLight.shadow.mapSize.width = LIGHTING.SHADOW_MAP_SIZE;
@@ -236,7 +242,7 @@ class SpaceVisualization {
         const torusGeometry = new THREE.TorusGeometry(torusRadius, bodyRadius * VISUAL_EFFECTS.TORUS_RADIUS_MULTIPLIER, GEOMETRY.TORUS_TUBULAR_SEGMENTS, GEOMETRY.TORUS_RADIAL_SEGMENTS);
 
         // Use planet's color for highlight ring
-        const ringColor = body.color || COLORS.DEFAULT_ORBIT_COLOR;
+        const ringColor = body.color || this.colors.DEFAULT_ORBIT_COLOR;
         const torusMaterial = new THREE.MeshPhongMaterial({
             color: ringColor,
             emissive: ringColor,
@@ -439,7 +445,7 @@ class SpaceVisualization {
         starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
 
         const starMaterial = new THREE.PointsMaterial({
-            color: COLORS.STARFIELD_COLOR,
+            color: this.colors.STARFIELD_COLOR,
             size: VISUAL_EFFECTS.STARFIELD_PARTICLE_SIZE,
             sizeAttenuation: true
         });
@@ -527,7 +533,7 @@ class SpaceVisualization {
         const geometry = new THREE.SphereGeometry(radius, GEOMETRY.PLANET_SPHERE_SEGMENTS, GEOMETRY.PLANET_SPHERE_SEGMENTS);
 
         // Color palette - cycle through distinct colors by planet index
-        const colorPalette = COLORS.PLANET_PALETTE;
+        const colorPalette = this.colors.PLANET_PALETTE;
         const color = colorPalette[(index - 1) % colorPalette.length];
 
         const material = new THREE.MeshPhongMaterial({
@@ -691,7 +697,7 @@ class SpaceVisualization {
         if (!OrbitalValidator.isValid(orbitalElements)) return null;
 
         const body = this.bodies[bodyIndex];
-        const orbitColor = body ? body.color : COLORS.DEFAULT_ORBIT_COLOR;
+        const orbitColor = body ? body.color : this.colors.DEFAULT_ORBIT_COLOR;
 
         const a = orbitalElements.semi_major_axis;
         const e = orbitalElements.eccentricity;
@@ -850,6 +856,18 @@ class SpaceVisualization {
         this.renderer.setSize(this.width, this.height);
     }
 
+    updateTheme() {
+        // Update theme-aware colors
+        this.colors = getThemeColors();
+
+        // Update scene background and fog
+        this.scene.background.setHex(this.colors.BACKGROUND);
+        this.scene.fog.color.setHex(this.colors.BACKGROUND);
+
+        // Note: Other materials (planets, trails, etc.) will remain with their original colors
+        // Only background and orbit lines that use DEFAULT_ORBIT_COLOR will update
+        // This prevents sudden color shifts of planets when theme changes
+    }
 
     play() {
         this.isPlaying = true;

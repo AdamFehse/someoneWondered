@@ -5,6 +5,7 @@ import { UI, PHYSICS, ANIMATION, API_DEFAULTS } from './constants.js';
 import { SpaceSimulationAPI } from './api.js';
 import { SpaceVisualization } from './visualization.js';
 import { BrowserInference } from './browser_inference.js';
+import { initializeTheme } from './theme.js';
 
 // Global state
 let visualization = null;
@@ -14,15 +15,20 @@ let browserReady = false;
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", async () => {
+  // Initialize theme system (must be first for consistent styling)
+  initializeTheme();
+
   // Initialize API (auto-detects environment: localhost for dev, Render for production)
   api = new SpaceSimulationAPI();
   browserInference = new BrowserInference();
 
-  // Initialize visualization
+  // Initialize visualization (now respects theme)
   visualization = new SpaceVisualization("canvas-container");
 
   // Setup UI event listeners
   setupEventListeners();
+
+  updateInferenceInfo();
 
   // Load initial system
   await generateSystem();
@@ -39,10 +45,7 @@ function setupEventListeners() {
 
   const inferenceSelect = document.getElementById("inference-mode");
   if (inferenceSelect) {
-    inferenceSelect.addEventListener("change", async () => {
-      if (inferenceSelect.value === "browser") {
-        await warmBrowserModel();
-      }
+    inferenceSelect.addEventListener("change", () => {
       updateInferenceInfo();
     });
   }
@@ -184,14 +187,7 @@ async function generateSystem() {
         );
       } catch (error) {
         setBrowserStatus("error", "Browser inference failed");
-        setInferenceMode("server");
-        systemData = await api.generateSystem({
-          central_mass: centralMass,
-          num_bodies: numBodies,
-          temperature: temperature,
-          simulation_timesteps: PHYSICS.SIMULATION_TIMESTEPS,
-          simulation_dt: simulationDt
-        });
+        return;
       }
     } else {
       systemData = await api.generateSystem({
@@ -201,6 +197,10 @@ async function generateSystem() {
         simulation_timesteps: PHYSICS.SIMULATION_TIMESTEPS,
         simulation_dt: simulationDt
       });
+    }
+
+    if (!systemData) {
+      return;
     }
 
     // Load into visualization (includes orbital_elements)
@@ -258,8 +258,12 @@ function setInferenceMode(mode) {
 function updateInferenceInfo() {
   const mode = getInferenceMode();
   const infoEl = document.getElementById("info-inference");
+  const renderNote = document.getElementById("render-note");
   if (infoEl) {
     infoEl.textContent = mode === "browser" ? "Browser (ONNX)" : "Server (Render)";
+  }
+  if (renderNote) {
+    renderNote.classList.toggle("visible", mode === "server");
   }
 }
 
