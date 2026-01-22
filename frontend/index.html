@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Simulation - Proof Someone Wondered</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #000510;
+                --bg-secondary: rgba(0, 5, 16, 0.8);
+                --text-primary: #e0e0e0;
+                --text-secondary: #9090a0;
+                --border-accent: rgba(0, 170, 255, 0.2);
+                --border-accent-hover: rgba(0, 170, 255, 0.8);
+                --accent-color: #00aaff;
+                --accent-light: #0088ff;
+                --gold-primary: #ffd700;
+                --gold-secondary: #ffed4e;
+                --error-primary: #ff6b6b;
+                --error-border: rgba(255, 107, 107, 0.2);
+                --button-bg: linear-gradient(135deg, #00aaff, #0088ff);
+                --button-shadow: rgba(0, 170, 255, 0.3);
+                --secondary-bg: linear-gradient(135deg, #666, #888);
+                --secondary-shadow: rgba(100, 100, 100, 0.3);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-primary: #ffffff;
+                --bg-secondary: rgba(255, 255, 255, 0.9);
+                --text-primary: #1a1a1a;
+                --text-secondary: #666666;
+                --border-accent: rgba(0, 170, 255, 0.15);
+                --border-accent-hover: rgba(0, 170, 255, 0.6);
+                --accent-color: #0066cc;
+                --accent-light: #0055aa;
+                --gold-primary: #e6b800;
+                --gold-secondary: #ffcc00;
+                --error-primary: #cc0000;
+                --error-border: rgba(255, 107, 107, 0.15);
+                --button-bg: linear-gradient(135deg, #0066cc, #0055aa);
+                --button-shadow: rgba(0, 102, 204, 0.2);
+                --secondary-bg: linear-gradient(135deg, #cccccc, #aaaaaa);
+                --secondary-shadow: rgba(100, 100, 100, 0.2);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .ui-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 100;
+            max-width: 500px;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-accent);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .control-panel {
+            background: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-accent);
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-group input,
+        .control-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-accent);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+            transition: border-color 0.3s;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: var(--border-accent-hover);
+            background: rgba(0, 170, 255, 0.05);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--button-bg);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px var(--button-shadow);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: var(--secondary-bg);
+        }
+
+        button.secondary:hover {
+            box-shadow: 0 8px 16px var(--secondary-shadow);
+        }
+
+        #info-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--error-border);
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 100;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: var(--error-primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+        }
+
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div class="ui-container">
+        <div class="header">
+            <h1>Space Simulation</h1>
+            <p>AI-driven stellar system generation & N-body physics</p>
+        </div>
+
+        <div class="control-panel">
+            <div class="control-group">
+                <label for="central-mass">Central Mass (normalized 0-1)</label>
+                <input type="number" id="central-mass" step="0.1" value="0.2">
+            </div>
+
+            <div class="control-group">
+                <label for="num-bodies">Number of Planets</label>
+                <select id="num-bodies">
+                    <option value="1">1 Planet</option>
+                    <option value="2">2 Planets</option>
+                    <option value="3">3 Planets</option>
+                    <option value="4">4 Planets</option>
+                    <option value="5" selected>5 Planets</option>
+                    <option value="6">6 Planets</option>
+                    <option value="7">7 Planets</option>
+                    <option value="8">8 Planets</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="temperature">Generation Temperature</label>
+                <input type="number" id="temperature" step="0.1" value="0.67">
+            </div>
+            <div class="button-group">
+                <button id="generate-btn">Generate System</button>
+                <button id="pause-btn" class="secondary">Pause</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-panel">
+        <div class="info-title">Current System</div>
+        <div class="info-item">
+            <span>Central Mass:</span>
+            <span id="info-mass">-</span>
+        </div>
+        <div class="info-item">
+            <span>Planets:</span>
+            <span id="info-planets">-</span>
+        </div>
+        <div class="info-item">
+            <span>Frame:</span> 
+            <span id="info-frame">-</span>
+        </div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Application Scripts -->
+    <script src="js/api.js?v=1"></script>
+    <script src="js/visualization.js?v=1"></script>
+    <script src="js/main.js?v=1"></script>
+</body>
+</html>
