@@ -71,7 +71,11 @@ function setupPanelResize(panelId) {
 
   // Set initial width if not already set
   if (!panel.style.width) {
-    panel.style.width = panelId === "control-panel" ? UI.CONTROL_PANEL_WIDTH + "px" : UI.INFO_PANEL_WIDTH + "px";
+    const maxWidth = Math.max(240, window.innerWidth - 24);
+    const defaultWidth = panelId === "control-panel" ? UI.CONTROL_PANEL_WIDTH : UI.INFO_PANEL_WIDTH;
+    const isNarrow = window.innerWidth < 768;
+    const baseWidth = isNarrow ? Math.min(320, maxWidth) : defaultWidth;
+    panel.style.width = Math.min(baseWidth, maxWidth) + "px";
   }
 
   let isResizing = false;
@@ -114,6 +118,16 @@ function setupPanelResize(panelId) {
   resizeHandle.addEventListener("mousedown", handleMouseDown);
   document.addEventListener("mousemove", handleMouseMove);
   document.addEventListener("mouseup", handleMouseUp);
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 768) {
+      return;
+    }
+    const maxWidth = Math.max(240, window.innerWidth - 24);
+    if (panel.offsetWidth > maxWidth) {
+      panel.style.width = maxWidth + "px";
+    }
+  });
 }
 
 async function generateSystem() {
