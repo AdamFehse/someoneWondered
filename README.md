@@ -4,7 +4,7 @@ AI-driven stellar system generation & N-body physics simulation with 3D visualiz
 
 ## TL;DR
 
-[**Demo**:](https://adamfehse.github.io/someoneWondered/)
+## [**Demo**:](https://adamfehse.github.io/someoneWondered/)
 
 **Tech**: Transformer (RoPE, AdamW, cosine annealing) (PyTorch) + FastAPI + Three.js
 
