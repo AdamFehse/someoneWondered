@@ -17,51 +17,104 @@
         </div>
 
         <div id="control-panel" class="control-panel">
-            <div class="control-group">
-                <label for="central-mass">Central Mass (normalized 0-1)</label>
-                <input type="number" id="central-mass" step="0.1" value="0.2">
+            <div class="control-panel-header">
+                <div class="control-panel-title">Controls</div>
+                <div class="control-panel-toggle">▼</div>
             </div>
 
-            <div class="control-group">
-                <label for="num-bodies">Number of Planets</label>
-                <select id="num-bodies">
-                    <option value="1">1 Planet</option>
-                    <option value="2">2 Planets</option>
-                    <option value="3">3 Planets</option>
-                    <option value="4">4 Planets</option>
-                    <option value="5">5 Planets</option>
-                    <option value="6">6 Planets</option>
-                    <option value="7">7 Planets</option>
-                    <option value="8" selected>8 Planets</option>
-                </select>
+            <div class="control-panel-content">
+                <!-- Section 1: Generation Settings -->
+                <div class="control-section" data-section="generation">
+                    <div class="section-header">
+                        <span class="section-title">Generation Settings</span>
+                        <span class="section-toggle">▼</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="control-group">
+                            <label for="central-mass">Central Mass (normalized 0-1)</label>
+                            <input type="number" id="central-mass" step="0.1" value="0.2">
+                        </div>
+
+                        <div class="control-group">
+                            <label for="num-bodies">Number of Planets</label>
+                            <select id="num-bodies">
+                                <option value="1">1 Planet</option>
+                                <option value="2">2 Planets</option>
+                                <option value="3">3 Planets</option>
+                                <option value="4">4 Planets</option>
+                                <option value="5">5 Planets</option>
+                                <option value="6">6 Planets</option>
+                                <option value="7">7 Planets</option>
+                                <option value="8" selected>8 Planets</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="temperature">Generation Temperature</label>
+                            <input type="number" id="temperature" step="0.1" value="0.67">
+                        </div>
+                        <div class="control-group">
+                            <label for="inference-mode">Inference Mode</label>
+                            <select id="inference-mode">
+                                <option value="browser" selected>Browser (ONNX/WASM)</option>
+                                <option value="server">Server (Render)</option>
+                            </select>
+                            <div class="status-row">
+                                <span>Model</span>
+                                <span id="browser-model-status" class="status-pill">Not Loaded</span>
+                            </div>
+                            <div id="render-note" class="info-note">
+                                Render mode can take ~2 minutes but uses full backend physics for a more scientific (less fun) run.
+                            </div>
+                            <label class="toggle-row" for="stream-results">
+                                <input type="checkbox" id="stream-results" checked>
+                                <span>Stream planets as they generate</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Display Settings -->
+                <div class="control-section" data-section="display">
+                    <div class="section-header">
+                        <span class="section-title">Display Settings</span>
+                        <span class="section-toggle">▼</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="control-group">
+                            <label for="speed-slider">Animation Speed</label>
+                            <div class="slider-container">
+                                <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="1" class="speed-slider">
+                                <span id="speed-value" class="speed-value">1x</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="trail-mode">Trail Mode</label>
+                            <select id="trail-mode">
+                                <option value="short">Short Trails (Geometry)</option>
+                                <option value="long" selected>Long Trails (Streaming)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="display-mode">Display Mode</label>
+                            <select id="display-mode">
+                                <option value="both" selected>Planets + Trails</option>
+                                <option value="planets-only">Planets Only</option>
+                                <option value="trails-only">Trails Only</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Actions (always visible) -->
+                <div class="button-group">
+                    <button id="generate-btn">Generate System</button>
+                    <button id="pause-btn" class="secondary">Pause</button>
+                </div>
             </div>
 
-            <div class="control-group">
-                <label for="temperature">Generation Temperature</label>
-                <input type="number" id="temperature" step="0.1" value="0.67">
-            </div>
-            <div class="control-group">
-                <label for="inference-mode">Inference Mode</label>
-                <select id="inference-mode">
-                    <option value="browser" selected>Browser (ONNX/WASM)</option>
-                    <option value="server">Server (Render)</option>
-                </select>
-                <div class="status-row">
-                    <span>Model</span>
-                    <span id="browser-model-status" class="status-pill">Not Loaded</span>
-                </div>
-                <div id="render-note" class="info-note">
-                    Render mode can take ~2 minutes but uses full backend physics for a more scientific (less fun) run.
-                </div>
-                <label class="toggle-row" for="stream-results">
-                    <input type="checkbox" id="stream-results" checked>
-                    <span>Stream planets as they generate</span>
-                </label>
-            </div>
-            <div class="button-group">
-                <button id="generate-btn">Generate System</button>
-                <button id="pause-btn" class="secondary">Pause</button>
-            </div>
             <div class="resize-handle control-panel-resize"></div>
         </div>
     </div>

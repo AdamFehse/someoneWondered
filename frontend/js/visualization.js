@@ -88,7 +88,17 @@ class SpaceVisualization {
         this.trajectories = null;
         this.currentFrame = 0;
         this.isPlaying = true;
-        this.frameRate = ANIMATION.FRAME_RATE;
+        this.playbackSpeed = 1.0; // Speed multiplier (0.25, 0.5, 1, 2, etc.)
+
+        // Trail modes
+        this.trailMode = 'long'; // 'short' or 'long'
+        this.trailModes = {
+            short: 100,  // Cool geometric patterns
+            long: 500    // Longer streaming trails
+        };
+
+        // Display mode state
+        this.displayMode = 'both'; // 'both', 'planets-only', 'trails-only'
 
         // Camera controls
         this.setupOrbitControls();
@@ -472,6 +482,10 @@ class SpaceVisualization {
          * }
          */
 
+        // Store current modes to restore after loading
+        const currentTrailMode = this.trailMode;
+        const currentDisplayMode = this.displayMode;
+
         // Clear selection when loading new system
         this.deselectBody();
 
@@ -499,6 +513,10 @@ class SpaceVisualization {
         for (let i = 1; i < numBodies; i++) {
             this.createBody(i, systemData.bodies[i].mass);
         }
+
+        // Restore previous modes after creating bodies
+        this.setTrailMode(currentTrailMode);
+        this.setDisplayMode(currentDisplayMode);
 
         // Reset animation
         this.currentFrame = 0;
@@ -575,10 +593,16 @@ class SpaceVisualization {
          * color: hex color value (e.g., 0x00aaff)
          */
         const geometry = new THREE.BufferGeometry();
-        const maxPositions = GEOMETRY.TRAIL_MAX_POSITIONS;
+        const maxPositions = this.trailModes[this.trailMode];
 
         const positions = new Float32Array(maxPositions * 3);
         const colors = new Float32Array(maxPositions * 3);
+
+        // Initialize arrays with zeros
+        for (let i = 0; i < positions.length; i++) {
+            positions[i] = 0;
+            colors[i] = 0;
+        }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
@@ -595,10 +619,13 @@ class SpaceVisualization {
             blending: THREE[VISUAL_EFFECTS.TRAIL_BLENDING]
         });
 
-        const lineSegments = new THREE.LineSegments(geometry, material);
+        const lineSegments = new THREE.Line(geometry, material);
         lineSegments.castShadow = false;
         lineSegments.receiveShadow = false;
         lineSegments.frustumCulled = false;
+
+        // Set visibility based on current display mode
+        lineSegments.visible = (this.displayMode === 'both' || this.displayMode === 'trails-only');
 
         return {
             lineSegments: lineSegments,
@@ -632,7 +659,9 @@ class SpaceVisualization {
         const b = (planetColor & 255) / 255;
 
         const n = trail.positions.length;
-        for (let i = 0; i < n; i++) {
+        const maxLen = Math.min(n, positions.length / 3);
+
+        for (let i = 0; i < maxLen; i++) {
             const pos = trail.positions[i];
             const idx = i * 3;
 
@@ -641,15 +670,26 @@ class SpaceVisualization {
             positions[idx + 2] = pos[2];
 
             // Fade effect: dim at start, brighten towards end
-            const alpha = i / n;
+            const alpha = i / Math.max(n - 1, 1); // Avoid division by zero
             colors[idx] = r * (VISUAL_EFFECTS.TRAIL_FADE_START + VISUAL_EFFECTS.TRAIL_FADE_END * alpha);
             colors[idx + 1] = g * (VISUAL_EFFECTS.TRAIL_FADE_START + VISUAL_EFFECTS.TRAIL_FADE_END * alpha);
             colors[idx + 2] = b * (VISUAL_EFFECTS.TRAIL_FADE_START + VISUAL_EFFECTS.TRAIL_FADE_END * alpha);
         }
 
+        // Fill remaining positions with zeros to clear old data
+        for (let i = maxLen; i < positions.length / 3; i++) {
+            const idx = i * 3;
+            positions[idx] = 0;
+            positions[idx + 1] = 0;
+            positions[idx + 2] = 0;
+            colors[idx] = 0;
+            colors[idx + 1] = 0;
+            colors[idx + 2] = 0;
+        }
+
         geometry.attributes.position.needsUpdate = true;
         geometry.attributes.color.needsUpdate = true;
-        geometry.setDrawRange(0, n - 1);
+        geometry.setDrawRange(0, Math.max(0, n));
     }
 
     updateBodies(frameIndex) {
@@ -676,15 +716,21 @@ class SpaceVisualization {
         requestAnimationFrame(() => this.animate());
 
         if (this.isPlaying && this.trajectories) {
-            // Update bodies
-            this.updateBodies(this.currentFrame);
+            // Smooth playback speed control
+            // Default frame advance per render loop = 30/60 = 0.5 frames per loop
+            const framesPerLoop = (ANIMATION.FRAME_RATE / 60) * this.playbackSpeed;
 
-            // Advance frame
-            this.currentFrame++;
+            // Advance frame with smooth speed control
+            this.currentFrame += framesPerLoop;
+
+            // Loop back to start when reaching end
             if (this.currentFrame >= this.trajectories.length) {
                 this.currentFrame = 0;
                 this.resetTrails();
             }
+
+            // Update bodies at current (possibly fractional) frame
+            this.updateBodies(Math.floor(this.currentFrame));
         }
 
         // Update selection highlights (animation, position tracking, etc.)
@@ -904,6 +950,96 @@ class SpaceVisualization {
         this.isPlaying = false;
     }
 
+    setPlaybackSpeed(multiplier) {
+        // multiplier is a factor (0.25, 0.5, 1, 1.5, 2, etc.)
+        this.playbackSpeed = multiplier;
+    }
+
+    setTrailMode(mode) {
+        // mode is 'short' or 'long'
+        if (!this.trailModes[mode]) return;
+
+        this.trailMode = mode;
+        const newMaxPositions = this.trailModes[mode];
+
+        // Update all existing trails with new max positions
+        for (const body of this.bodies) {
+            if (body.trail) {
+                // Store current positions before changing max length
+                const currentPositions = [...body.trail.positions];
+
+                body.trail.maxPositions = newMaxPositions;
+
+                // Trim positions if new max is smaller than current positions
+                if (currentPositions.length > newMaxPositions) {
+                    body.trail.positions = currentPositions.slice(-newMaxPositions);
+                } else {
+                    body.trail.positions = currentPositions;
+                }
+
+                // Update the trail geometry to reflect new max positions
+                this.updateTrailGeometry(body.trail);
+            }
+        }
+    }
+
+    updateTrailGeometry(trail) {
+        // Update the geometry buffer to accommodate the new max positions
+        if (!trail) return;
+
+        const geometry = trail.lineSegments.geometry;
+        const currentPositions = geometry.attributes.position.array;
+        const currentColors = geometry.attributes.color.array;
+
+        // Create new arrays with the correct size
+        const newMaxPositions = trail.maxPositions;
+        const newPositions = new Float32Array(newMaxPositions * 3);
+        const newColors = new Float32Array(newMaxPositions * 3);
+
+        // Copy existing data to new arrays
+        const copyLength = Math.min(currentPositions.length, newPositions.length);
+        for (let i = 0; i < copyLength; i++) {
+            newPositions[i] = currentPositions[i];
+            newColors[i] = currentColors[i];
+        }
+
+        // Update geometry attributes
+        geometry.setAttribute('position', new THREE.BufferAttribute(newPositions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(newColors, 3));
+
+        // Update draw range based on current positions
+        const drawCount = Math.min(trail.positions.length, newMaxPositions);
+        geometry.setDrawRange(0, Math.max(0, drawCount));
+
+        // Mark attributes for update
+        geometry.attributes.position.needsUpdate = true;
+        geometry.attributes.color.needsUpdate = true;
+
+        // Update bounding sphere to prevent NaN issues
+        geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), PHYSICS.TARGET_VIEW_DISTANCE);
+    }
+
+    setDisplayMode(mode) {
+        // mode: 'both' (planets + trails), 'planets-only', 'trails-only'
+        this.displayMode = mode;
+
+        for (const body of this.bodies) {
+            // Toggle planet visibility
+            if (body.mesh) {
+                body.mesh.visible = (mode === 'both' || mode === 'planets-only');
+            }
+            // Toggle trail visibility
+            if (body.trail && body.trail.lineSegments) {
+                body.trail.lineSegments.visible = (mode === 'both' || mode === 'trails-only');
+
+                // Ensure trails maintain their state when becoming visible again
+                if (body.trail.lineSegments.visible && body.trail.positions.length > 0) {
+                    this.updateTrailGeometry(body.trail);
+                }
+            }
+        }
+    }
+
     resetTrails() {
         for (const body of this.bodies) {
             if (!body.trail) {
@@ -911,7 +1047,17 @@ class SpaceVisualization {
             }
             body.trail.positions = [];
             const geometry = body.trail.lineSegments.geometry;
-            geometry.setDrawRange(0, 0);
+
+            // Clear the position and color arrays
+            const positions = geometry.attributes.position.array;
+            const colors = geometry.attributes.color.array;
+
+            for (let i = 0; i < positions.length; i++) {
+                positions[i] = 0;
+                colors[i] = 0;
+            }
+
+            geometry.setDrawRange(0, 1);
             geometry.attributes.position.needsUpdate = true;
             geometry.attributes.color.needsUpdate = true;
         }

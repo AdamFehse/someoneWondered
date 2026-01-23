@@ -61,8 +61,41 @@ function setupEventListeners() {
     }
   });
 
+  // Speed slider
+  const speedSlider = document.getElementById("speed-slider");
+  const speedValue = document.getElementById("speed-value");
+  if (speedSlider) {
+    speedSlider.addEventListener("input", () => {
+      const multiplier = parseFloat(speedSlider.value);
+      visualization.setPlaybackSpeed(multiplier);
+      speedValue.textContent = `${multiplier}x`;
+    });
+  }
+
+  // Trail mode selector
+  const trailModeSelect = document.getElementById("trail-mode");
+  if (trailModeSelect) {
+    trailModeSelect.addEventListener("change", () => {
+      visualization.setTrailMode(trailModeSelect.value);
+    });
+  }
+
+  // Display mode selector
+  const displayModeSelect = document.getElementById("display-mode");
+  if (displayModeSelect) {
+    displayModeSelect.addEventListener("change", () => {
+      visualization.setDisplayMode(displayModeSelect.value);
+    });
+  }
+
   // Panel resize handle
   setupPanelResize("control-panel");
+
+  // Setup collapsible sections
+  setupCollapsibleSections();
+
+  // Setup control panel toggle
+  setupControlPanelToggle();
 }
 
 function setupPanelResize(panelId) {
@@ -83,10 +116,10 @@ function setupPanelResize(panelId) {
 
   let isResizing = false;
   let startX, startY, startWidth, startHeight;
+  const DRAG_THRESHOLD = 5; // pixels
 
   const handleMouseDown = (e) => {
     if (e.button !== 0) return; // Only left mouse button
-    isResizing = true;
     startX = e.clientX;
     startY = e.clientY;
     startWidth = panel.offsetWidth;
@@ -96,26 +129,44 @@ function setupPanelResize(panelId) {
   };
 
   const handleMouseMove = (e) => {
-    if (!isResizing) return;
+    if (!startX) return;
 
     const deltaX = e.clientX - startX;
     const deltaY = e.clientY - startY;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-    const newWidth = Math.max(UI.MIN_PANEL_WIDTH, startWidth + deltaX);
-    const newHeight = Math.max(UI.MIN_PANEL_HEIGHT, startHeight + deltaY);
+    // Only start resizing if movement exceeds threshold
+    if (distance > DRAG_THRESHOLD) {
+      isResizing = true;
 
-    panel.style.width = newWidth + "px";
-    if (panelId === "info-panel") {
-      panel.style.maxHeight = newHeight + "px";
+      const newWidth = Math.max(UI.MIN_PANEL_WIDTH, startWidth + deltaX);
+      const newHeight = Math.max(UI.MIN_PANEL_HEIGHT, startHeight + deltaY);
+
+      panel.style.width = newWidth + "px";
+      if (panelId === "info-panel") {
+        panel.style.maxHeight = newHeight + "px";
+      }
     }
   };
 
-  const handleMouseUp = () => {
-    if (isResizing) {
-      isResizing = false;
-      document.body.style.userSelect = "";
-      document.body.style.cursor = "";
+  const handleMouseUp = (e) => {
+    if (!isResizing && startX !== undefined) {
+      // This was a click, not a drag
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+      if (distance <= DRAG_THRESHOLD && panelId === "control-panel") {
+        // Don't toggle collapse on resize handle click - let the header handle it
+        // This prevents the resize handle from toggling the panel
+      }
     }
+
+    isResizing = false;
+    startX = undefined;
+    startY = undefined;
+    document.body.style.userSelect = "";
+    document.body.style.cursor = "";
   };
 
   resizeHandle.addEventListener("mousedown", handleMouseDown);
@@ -130,6 +181,68 @@ function setupPanelResize(panelId) {
     if (panel.offsetWidth > maxWidth) {
       panel.style.width = maxWidth + "px";
     }
+  });
+}
+
+function setupControlPanelToggle() {
+  const panel = document.getElementById("control-panel");
+  const header = panel.querySelector(".control-panel-header");
+
+  if (header) {
+    header.addEventListener("click", (e) => {
+      // Prevent collapsing if clicking on the resize handle
+      if (e.target.closest('.resize-handle')) {
+        return;
+      }
+
+      panel.classList.toggle("collapsed");
+    });
+  }
+}
+
+function setupCollapsibleSections() {
+  const sections = document.querySelectorAll(".control-section");
+  const isMobile = window.innerWidth <= 768;
+
+  sections.forEach((section) => {
+    const header = section.querySelector(".section-header");
+
+    // Set initial state based on screen size
+    if (isMobile) {
+      section.classList.add("collapsed");
+    } else {
+      section.classList.remove("collapsed");
+    }
+
+    // Add click handlers for all devices
+    header.addEventListener("click", (e) => {
+      // Don't trigger collapse if clicking on input elements inside the header
+      if (e.target.tagName.toLowerCase() !== 'input' && e.target.tagName.toLowerCase() !== 'select') {
+        section.classList.toggle("collapsed");
+      }
+    });
+  });
+
+  // Re-initialize on window resize
+  let resizeTimeout;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      const nowMobile = window.innerWidth <= 768;
+
+      sections.forEach((section) => {
+        const header = section.querySelector(".section-header");
+        if (nowMobile) {
+          // Mobile: enable collapsing
+          header.style.cursor = "pointer";
+          header.style.pointerEvents = "auto";
+        } else {
+          // Desktop: keep collapsible but don't change initial state
+          header.style.cursor = "pointer";
+          header.style.pointerEvents = "auto";
+        }
+      });
+    }, 250);
   });
 }
 
