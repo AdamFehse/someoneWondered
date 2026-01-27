@@ -144,7 +144,13 @@ class SpaceVisualization {
             dragDistance: 0,
             minRadius: UI.MIN_CAMERA_RADIUS,
             maxRadius: UI.MAX_CAMERA_RADIUS,
-            dragStartedOverBody: false
+            dragStartedOverBody: false,
+            // Touch state
+            isTouching: false,
+            previousTouchDistance: 0,
+            previousTouchPosition: { x: 0, y: 0 },
+            touchStartDistance: 0,
+            touchStartRadius: 0
         };
 
         // Mouse events
@@ -152,6 +158,11 @@ class SpaceVisualization {
         this.renderer.domElement.addEventListener('mousemove', (e) => this.onMouseMove(e));
         this.renderer.domElement.addEventListener('mouseup', (e) => this.onMouseUp(e));
         this.renderer.domElement.addEventListener('wheel', (e) => this.onMouseWheel(e), { passive: false });
+
+        // Touch events for mobile
+        this.renderer.domElement.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
+        this.renderer.domElement.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
+        this.renderer.domElement.addEventListener('touchend', (e) => this.onTouchEnd(e), { passive: false });
 
         this.updateCameraPosition();
     }
@@ -425,6 +436,101 @@ class SpaceVisualization {
         );
 
         this.updateCameraPosition();
+    }
+
+    onTouchStart(e) {
+        e.preventDefault();
+        
+        if (e.touches.length === 1) {
+            // Single touch - prepare for rotation
+            this.cameraControls.isTouching = true;
+            this.cameraControls.previousTouchPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            this.cameraControls.dragDistance = 0;
+
+            // Check if starting touch over a body
+            const rect = this.renderer.domElement.getBoundingClientRect();
+            this.mouse.x = ((e.touches[0].clientX - rect.left) / rect.width) * 2 - 1;
+            this.mouse.y = -((e.touches[0].clientY - rect.top) / rect.height) * 2 + 1;
+
+            this.raycaster.setFromCamera(this.mouse, this.camera);
+            const bodyMeshes = this.bodies.map(b => b.mesh);
+            const intersects = this.raycaster.intersectObjects(bodyMeshes);
+
+            this.cameraControls.dragStartedOverBody = intersects.length > 0;
+        } else if (e.touches.length === 2) {
+            // Two touches - prepare for pinch zoom
+            this.cameraControls.isTouching = true;
+            this.cameraControls.touchStartDistance = this.getTouchDistance(e.touches);
+            this.cameraControls.previousTouchDistance = this.cameraControls.touchStartDistance;
+            this.cameraControls.touchStartRadius = this.cameraControls.spherical.radius;
+        }
+    }
+
+    onTouchMove(e) {
+        e.preventDefault();
+        
+        if (!this.cameraControls.isTouching) return;
+
+        if (e.touches.length === 1) {
+            // Single touch - rotate camera
+            const deltaX = e.touches[0].clientX - this.cameraControls.previousTouchPosition.x;
+            const deltaY = e.touches[0].clientY - this.cameraControls.previousTouchPosition.y;
+
+            // Track drag distance
+            this.cameraControls.dragDistance += Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+            // Only apply camera movement if dragged beyond threshold and didn't start over a body
+            if (this.cameraControls.dragDistance > this.cameraControls.dragThreshold && !this.cameraControls.dragStartedOverBody) {
+                this.cameraControls.spherical.theta -= deltaX * INTERACTION.CAMERA_ROTATION_DELTA;
+                this.cameraControls.spherical.phi -= deltaY * INTERACTION.CAMERA_ROTATION_DELTA;
+
+                // Clamp phi to avoid flipping
+                this.cameraControls.spherical.phi = Math.max(UI.CAMERA_PHI_MIN, Math.min(UI.CAMERA_PHI_MAX, this.cameraControls.spherical.phi));
+
+                this.updateCameraPosition();
+            }
+
+            this.cameraControls.previousTouchPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        } else if (e.touches.length === 2) {
+            // Two touches - pinch zoom
+            const currentDistance = this.getTouchDistance(e.touches);
+            const scaleFactor = currentDistance / this.cameraControls.touchStartDistance;
+            
+            this.cameraControls.spherical.radius = this.cameraControls.touchStartRadius / scaleFactor;
+
+            this.cameraControls.spherical.radius = Math.max(
+                this.cameraControls.minRadius,
+                Math.min(this.cameraControls.maxRadius, this.cameraControls.spherical.radius)
+            );
+
+            this.updateCameraPosition();
+        }
+    }
+
+    onTouchEnd(e) {
+        e.preventDefault();
+        
+        if (e.touches.length === 0) {
+            // All touches ended
+            if (this.cameraControls.isTouching && this.cameraControls.dragDistance < this.cameraControls.dragThreshold) {
+                // This was a tap, not a drag - check for body selection
+                if (e.changedTouches.length > 0) {
+                    const touch = e.changedTouches[0];
+                    this.onBodyClick({ clientX: touch.clientX, clientY: touch.clientY });
+                }
+            }
+            this.cameraControls.isTouching = false;
+            this.cameraControls.dragDistance = 0;
+        } else if (e.touches.length === 1) {
+            // One touch remains - switch back to rotation mode
+            this.cameraControls.previousTouchPosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+    }
+
+    getTouchDistance(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     updateCameraPosition() {
