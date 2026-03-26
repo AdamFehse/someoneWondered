@@ -58,10 +58,14 @@ const THEME_CLASS = 'theme-dark';
  * Get the current theme from localStorage or system preference
  */
 export function getCurrentTheme() {
-    // Check localStorage first
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-        return stored === 'dark' ? 'dark' : 'light';
+    // Check localStorage first (handle incognito mode failures)
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            return stored === 'dark' ? 'dark' : 'light';
+        }
+    } catch (e) {
+        // localStorage unavailable (incognito mode, etc.)
     }
 
     // Fall back to system preference
@@ -94,8 +98,12 @@ export function applyTheme(theme) {
         document.documentElement.classList.remove(THEME_CLASS);
     }
 
-    // Store preference
-    localStorage.setItem(STORAGE_KEY, theme);
+    // Store preference (silently fail in incognito mode)
+    try {
+        localStorage.setItem(STORAGE_KEY, theme);
+    } catch (e) {
+        // localStorage unavailable (incognito mode, etc.)
+    }
 
     // Dispatch custom event for other modules
     window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
