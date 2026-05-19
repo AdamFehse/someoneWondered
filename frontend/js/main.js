@@ -8,6 +8,12 @@ let api = null;
 let browserInference = null;
 let browserReady = false;
 
+const vibes = [
+    'chaotic orbits ahead', 'a quiet corner', 'tidal love', 'gravity wins',
+    'cosmic ballet', 'solar jazz', 'dusty neighbors', 'resonant hearts',
+    'wandering giants', 'tiny & fierce', 'eccentric crew', 'just formed',
+];
+
 const genTexts = [
     'Summoning planets...',
     'Stirring the cosmos...',
@@ -85,7 +91,7 @@ async function generateSystem() {
 
     try {
         const centralMass = 0.1;
-        const numBodies = 8;
+        const numBodies = Math.floor(Math.random() * 6) + 3;
         const temperature = 0.67;
 
         const safeMass = Math.max(centralMass, PHYSICS.CENTRAL_MASS_MIN);
@@ -132,7 +138,8 @@ async function generateSystem() {
         visualization.loadSystem(systemData);
         updatePlanetCount(systemData);
         setPauseIcon(true);
-        toast(`✨ New system with ${Math.max(0, systemData.bodies.length - 1)} planets!`);
+        const vibe = vibes[Math.floor(Math.random() * vibes.length)];
+        toast(`🪐 ${Math.max(0, systemData.bodies.length - 1)} planets — ${vibe}`);
     } catch (e) {
         console.error("Generation error:", e);
         toast("Something went wrong — try again!");
