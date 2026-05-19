@@ -138,8 +138,18 @@ async function generateSystem() {
         visualization.loadSystem(systemData);
         updatePlanetCount(systemData);
         setPauseIcon(true);
+
+        const trailModes = ['long', 'short'];
+        const displayModes = ['both', 'planets-only', 'trails-only'];
+        const trailMode = trailModes[Math.floor(Math.random() * trailModes.length)];
+        const displayMode = displayModes[Math.floor(Math.random() * displayModes.length)];
+        visualization.setTrailMode(trailMode);
+        visualization.setDisplayMode(displayMode);
+
+        const trailLabel = trailMode === 'long' ? 'streaming trails' : 'crisp orbits';
+        const displayLabel = displayMode === 'both' ? '' : displayMode === 'planets-only' ? ' — naked planets' : ' — just trails';
         const vibe = vibes[Math.floor(Math.random() * vibes.length)];
-        toast(`🪐 ${Math.max(0, systemData.bodies.length - 1)} planets — ${vibe}`);
+        toast(`🪐 ${Math.max(0, systemData.bodies.length - 1)} planets · ${trailLabel}${displayLabel} — ${vibe}`);
     } catch (e) {
         console.error("Generation error:", e);
         toast("Something went wrong — try again!");
