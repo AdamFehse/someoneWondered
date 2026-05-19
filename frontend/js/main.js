@@ -5,7 +5,6 @@ import { UI, PHYSICS, ANIMATION, API_DEFAULTS } from './constants.js';
 import { SpaceSimulationAPI } from './api.js';
 import { SpaceVisualization } from './visualization.js';
 import { BrowserInference } from './browser_inference.js';
-import { initializeTheme } from './theme.js';
 
 // Global state
 let visualization = null;
@@ -15,14 +14,11 @@ let browserReady = false;
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", async () => {
-  // Initialize theme system (must be first for consistent styling)
-  initializeTheme();
-
   // Initialize API (auto-detects environment: localhost for dev, Render for production)
   api = new SpaceSimulationAPI();
   browserInference = new BrowserInference();
 
-  // Initialize visualization (now respects theme)
+  // Initialize visualization
   visualization = new SpaceVisualization("canvas-container");
 
   // Setup UI event listeners

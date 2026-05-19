@@ -109,8 +109,10 @@ class SpaceVisualization {
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize());
 
-        // Listen for theme changes
-        window.addEventListener('themechange', () => this.updateTheme());
+        // Listen for system theme changes
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => this.updateTheme());
+        }
 
         // Animation
         this.animate();
@@ -1015,17 +1017,11 @@ class SpaceVisualization {
     }
 
     getStarfieldColor() {
-        // Get current theme to determine starfield color
-        const theme = localStorage.getItem('theme-preference') ||
-                     (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-
-        // In dark mode, show bright stars; in light mode, show nebula-like particles
-        if (theme === 'dark') {
-            return 0xffffff; // Bright white stars for dark mode
+        const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (dark) {
+            return 0xffffff;
         } else {
-            // For light mode, create a subtle nebula effect with soft purples/blues
-            // Using a soft purple/magenta that will contrast nicely with the light background
-            return 0x9966cc; // Soft purple for light mode nebula effect
+            return 0x9966cc;
         }
     }
 

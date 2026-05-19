@@ -1,7 +1,7 @@
 /**
  * Main stylesheet for Space Simulation
  * All styling uses CSS variables for theme-aware consistency
- * Source of truth: theme.js
+ * Light/dark mode handled via prefers-color-scheme media query
  */
 
 :root {
@@ -24,6 +24,27 @@
     --button-shadow: rgba(0, 102, 204, 0.2);
     --secondary-bg: linear-gradient(135deg, #cccccc, #aaaaaa);
     --secondary-shadow: rgba(100, 100, 100, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #000510;
+        --bg-secondary: rgba(0, 5, 16, 0.2);
+        --text-primary: #e0e0e0;
+        --text-secondary: #9090a0;
+        --border-accent: rgba(0, 170, 255, 0.2);
+        --border-accent-hover: rgba(0, 170, 255, 0.8);
+        --accent-color: #00aaff;
+        --accent-light: #0088ff;
+        --gold-primary: #ffd700;
+        --gold-secondary: #ffed4e;
+        --error-primary: #ff6b6b;
+        --error-border: rgba(255, 107, 107, 0.2);
+        --button-bg: linear-gradient(135deg, #00aaff, #0088ff);
+        --button-shadow: rgba(0, 170, 255, 0.3);
+        --secondary-bg: linear-gradient(135deg, #666, #888);
+        --secondary-shadow: rgba(100, 100, 100, 0.3);
+    }
 }
 
 /* Reset */
