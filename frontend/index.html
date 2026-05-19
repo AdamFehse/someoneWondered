@@ -2,178 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Simulation - Proof Someone Wondered</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Someone Wondered</title>
     <link rel="icon" href="./assets/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
     <div id="canvas-container"></div>
 
-    <div class="ui-container">
-        <div class="header">
-            <h1>Space Simulation</h1>
-            <p>AI-driven stellar system generation & N-body physics</p>
+    <div id="ui-overlay">
+        <div id="title-bar">
+            <h1>✨ someone wondered</h1>
+            <span id="planet-count"></span>
         </div>
 
-        <div id="control-panel" class="control-panel">
-            <div class="control-panel-header">
-                <div class="control-panel-title">Controls</div>
-                <div class="control-panel-toggle">▼</div>
-            </div>
-
-            <div class="control-panel-content">
-                <!-- Section 1: Generation Settings -->
-                <div class="control-section" data-section="generation">
-                    <div class="section-header">
-                        <span class="section-title">Generation Settings</span>
-                        <span class="section-toggle">▼</span>
-                    </div>
-                    <div class="section-content">
-                        <div class="control-group">
-                            <label for="central-mass">Central Mass (normalized 0-1)</label>
-                            <input type="number" id="central-mass" step="0.1" value="0.2">
-                        </div>
-
-                        <div class="control-group">
-                            <label for="num-bodies">Number of Planets</label>
-                            <select id="num-bodies">
-                                <option value="1">1 Planet</option>
-                                <option value="2">2 Planets</option>
-                                <option value="3">3 Planets</option>
-                                <option value="4">4 Planets</option>
-                                <option value="5">5 Planets</option>
-                                <option value="6">6 Planets</option>
-                                <option value="7">7 Planets</option>
-                                <option value="8" selected>8 Planets</option>
-                            </select>
-                        </div>
-
-                        <div class="control-group">
-                            <label for="temperature">Generation Temperature</label>
-                            <input type="number" id="temperature" step="0.1" value="0.67">
-                        </div>
-                        <div class="control-group">
-                            <label for="inference-mode">Inference Mode</label>
-                            <select id="inference-mode">
-                                <option value="browser" selected>Browser (ONNX/WASM)</option>
-                                <option value="server">Server (Render)</option>
-                            </select>
-                            <div class="status-row">
-                                <span>Model</span>
-                                <span id="browser-model-status" class="status-pill">Not Loaded</span>
-                            </div>
-                            <div id="render-note" class="info-note">
-                                Render mode can take ~2 minutes but uses full backend physics for a more scientific (less fun) run.
-                            </div>
-                            <label class="toggle-row" for="stream-results">
-                                <input type="checkbox" id="stream-results" checked>
-                                <span>Stream planets as they generate</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 2: Display Settings -->
-                <div class="control-section" data-section="display">
-                    <div class="section-header">
-                        <span class="section-title">Display Settings</span>
-                        <span class="section-toggle">▼</span>
-                    </div>
-                    <div class="section-content">
-                        <div class="control-group">
-                            <label for="speed-slider">Animation Speed</label>
-                            <div class="slider-container">
-                                <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="1" class="speed-slider">
-                                <span id="speed-value" class="speed-value">1x</span>
-                            </div>
-                        </div>
-
-                        <div class="control-group">
-                            <label for="trail-mode">Trail Mode</label>
-                            <select id="trail-mode">
-                                <option value="short">Short Trails (Geometry)</option>
-                                <option value="long" selected>Long Trails (Streaming)</option>
-                            </select>
-                        </div>
-
-                        <div class="control-group">
-                            <label for="display-mode">Display Mode</label>
-                            <select id="display-mode">
-                                <option value="both" selected>Planets + Trails</option>
-                                <option value="planets-only">Planets Only</option>
-                                <option value="trails-only">Trails Only</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 3: Actions (always visible) -->
-                <div class="button-group">
-                    <button id="generate-btn">Generate System</button>
-                    <button id="pause-btn" class="secondary">Pause</button>
+        <div id="bottom-bar">
+            <div id="play-controls">
+                <button id="pause-btn" class="icon-btn" aria-label="Pause">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                </button>
+                <div id="speed-control">
+                    <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="1">
+                    <span id="speed-label">1×</span>
                 </div>
             </div>
 
-            <div class="resize-handle control-panel-resize"></div>
+            <button id="generate-btn">
+                <span class="btn-icon">🌌</span>
+                <span class="btn-text">Generate</span>
+            </button>
+
+            <div id="selection-info"></div>
         </div>
+
+        <div id="generating-overlay" class="hidden">
+            <div class="generating-content">
+                <div class="spinner"></div>
+                <p id="generating-text">Summoning planets...</p>
+            </div>
+        </div>
+
+        <div id="toast" class="hidden"></div>
     </div>
 
-    <div id="info-panel">
-        <div class="info-title">Current System</div>
-        <div class="info-item">
-            <span>Central Mass:</span>
-            <span id="info-mass">-</span>
-        </div>
-        <div class="info-item">
-            <span>Planets:</span>
-            <span id="info-planets">-</span>
-        </div>
-        <div class="info-item">
-            <span>Frame:</span>
-            <span id="info-frame">-</span>
-        </div>
-        <div class="info-item">
-            <span>Inference:</span>
-            <span id="info-inference">Browser (ONNX)</span>
-        </div>
-
-        <div id="selection-section" class="selection-section hidden">
-            <div class="selection-divider"></div>
-            <div class="info-title selection-title">Selected Body</div>
-            <div class="info-item">
-                <span>Name:</span>
-                <span id="selection-name">-</span>
-            </div>
-            <div class="info-item">
-                <span>Mass:</span>
-                <span id="selection-mass">-</span>
-            </div>
-            <div class="info-item">
-                <span>Semi-major Axis:</span>
-                <span id="selection-sma">-</span>
-            </div>
-            <div class="info-item">
-                <span>Eccentricity:</span>
-                <span id="selection-ecc">-</span>
-            </div>
-            <div class="info-item">
-                <span>Inclination:</span>
-                <span id="selection-inc">-</span>
-            </div>
-            <div class="info-item">
-                <span>Period:</span>
-                <span id="selection-period">-</span>
-            </div>
-            <button id="deselect-btn" class="deselect-btn">Deselect</button>
-        </div>
-    </div>
-
-    <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/ort.min.js"></script>
-
-    <!-- Application Scripts -->
-    <script type="module" src="./js/main.js?v=1"></script>
+    <script type="module" src="./js/main.js"></script>
 </body>
 </html>

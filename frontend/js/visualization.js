@@ -322,52 +322,22 @@ class SpaceVisualization {
 
     updateSelectionUI(bodyIndex) {
         const body = this.bodies[bodyIndex];
-        const selectionSection = document.getElementById('selection-section');
+        const info = document.getElementById('selection-info');
 
-        // Show selection section with smooth animation
-        selectionSection.classList.remove('hidden');
-        selectionSection.classList.add('visible');
-
-        // Update body name (star or Planet #N)
-        let bodyName = 'Star';
+        let label = '⭐ Star';
         if (body.type === 'planet') {
-            bodyName = `Planet #${body.index}`;
+            label = `🪐 Planet #${body.index + 1}`;
         }
-        document.getElementById('selection-name').textContent = bodyName;
-
-        // Update mass
-        document.getElementById('selection-mass').textContent =
-            body.mass.toFixed(4) + ' M☉';
-
-        // Update orbital elements if available
-        const smaEl = document.getElementById('selection-sma');
-        const eccEl = document.getElementById('selection-ecc');
-        const incEl = document.getElementById('selection-inc');
-        const periodEl = document.getElementById('selection-period');
-
-        if (this.systemData && this.systemData.orbital_elements && bodyIndex > 0 && this.systemData.orbital_elements[bodyIndex]) {
-            const orbital = this.systemData.orbital_elements[bodyIndex];
-            smaEl.textContent = orbital.semi_major_axis != null ? orbital.semi_major_axis.toFixed(3) + ' AU' : '-';
-            eccEl.textContent = orbital.eccentricity != null ? orbital.eccentricity.toFixed(4) : '-';
-            incEl.textContent = orbital.inclination != null ? orbital.inclination.toFixed(2) + '°' : '-';
-            periodEl.textContent = orbital.orbital_period != null ? orbital.orbital_period.toFixed(3) + ' years' : '-';
-        } else {
-            // Star or no orbital elements available
-            smaEl.textContent = '-';
-            eccEl.textContent = '-';
-            incEl.textContent = '-';
-            periodEl.textContent = '-';
+        if (body.mass != null) {
+            label += ` — ${body.mass.toFixed(2)} M☉`;
         }
-
-        // Setup deselect button
-        const deselectBtn = document.getElementById('deselect-btn');
-        deselectBtn.onclick = () => this.deselectBody();
+        info.textContent = label;
+        info.classList.add('visible');
     }
 
     hideSelectionUI() {
-        const selectionSection = document.getElementById('selection-section');
-        selectionSection.classList.remove('visible');
-        selectionSection.classList.add('hidden');
+        const info = document.getElementById('selection-info');
+        info.classList.remove('visible');
     }
 
     onMouseDown(e) {
