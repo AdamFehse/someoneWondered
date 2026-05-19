@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Someone Wondered</title>
+    <link rel="icon" href="./assets/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="sim-page">
+    <div id="canvas-container"></div>
+
+    <div id="ui-overlay">
+        <div id="title-bar">
+            <h1>✨ someone wondered</h1>
+            <span id="planet-count"></span>
+            <a href="./index.html" class="nav-link">merch</a>
+        </div>
+
+        <div id="bottom-bar">
+            <div id="play-controls">
+                <button id="pause-btn" class="icon-btn" aria-label="Pause">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                </button>
+                <div id="speed-control">
+                    <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="1">
+                    <span id="speed-label">1×</span>
+                </div>
+            </div>
+
+            <button id="generate-btn">
+                <span class="btn-icon">🌌</span>
+                <span class="btn-text">Generate</span>
+            </button>
+
+            <div id="selection-info"></div>
+        </div>
+
+        <div id="generating-overlay" class="hidden">
+            <div class="generating-content">
+                <div class="spinner"></div>
+                <p id="generating-text">Summoning planets...</p>
+            </div>
+        </div>
+
+        <div id="toast" class="hidden"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/ort.min.js"></script>
+    <script type="module" src="./js/sim.js"></script>
+</body>
+</html>

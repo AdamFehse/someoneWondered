@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Someone Wondered</title>
+    <title>Merch Configurator — Someone Wondered</title>
     <link rel="icon" href="./assets/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="./styles.css">
 </head>
@@ -13,40 +13,58 @@
     <div id="ui-overlay">
         <div id="title-bar">
             <h1>✨ someone wondered</h1>
-            <span id="planet-count"></span>
+            <span id="tagline">merch configurator</span>
+            <a href="./sim.html" class="nav-link">space sim</a>
         </div>
 
-        <div id="bottom-bar">
-            <div id="play-controls">
-                <button id="pause-btn" class="icon-btn" aria-label="Pause">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                </button>
-                <div id="speed-control">
-                    <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="1">
-                    <span id="speed-label">1×</span>
-                </div>
+        <div id="configurator">
+            <div id="preview">
+                <canvas id="shirt-canvas" width="400" height="500"></canvas>
             </div>
 
-            <button id="generate-btn">
-                <span class="btn-icon">🌌</span>
-                <span class="btn-text">Generate</span>
-            </button>
+            <div id="controls">
+                <div class="control-row">
+                    <div class="color-picker-group">
+                        <label>Shirt</label>
+                        <input type="color" id="shirt-color" value="#1a1a2e">
+                    </div>
+                    <div class="color-picker-group">
+                        <label>Text</label>
+                        <input type="color" id="text-color" value="#ffffff">
+                    </div>
+                </div>
 
-            <div id="selection-info"></div>
-        </div>
+                <div class="control-row">
+                    <div class="text-input-group">
+                        <label>Custom text</label>
+                        <input type="text" id="shirt-text" value="ULM" maxlength="20" placeholder="Your text here">
+                    </div>
+                </div>
 
-        <div id="generating-overlay" class="hidden">
-            <div class="generating-content">
-                <div class="spinner"></div>
-                <p id="generating-text">Summoning planets...</p>
+                <div class="control-row">
+                    <div class="size-group">
+                        <label>Size</label>
+                        <div id="size-options">
+                            <button class="size-btn" data-size="S">S</button>
+                            <button class="size-btn" data-size="M">M</button>
+                            <button class="size-btn active" data-size="L">L</button>
+                            <button class="size-btn" data-size="XL">XL</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <button id="add-to-cart">
+                        <span class="btn-icon">🛒</span>
+                        <span class="btn-text">Add to Cart — $29.99</span>
+                    </button>
+                </div>
             </div>
         </div>
 
         <div id="toast" class="hidden"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/ort.min.js"></script>
     <script type="module" src="./js/main.js"></script>
 </body>
 </html>

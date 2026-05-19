@@ -1,170 +1,161 @@
-import { PHYSICS, API_DEFAULTS } from './constants.js';
-import { SpaceSimulationAPI } from './api.js';
-import { SpaceVisualization } from './visualization.js';
-import { BrowserInference } from './browser_inference.js';
+const canvas = document.getElementById('shirt-canvas');
+const ctx = canvas.getContext('2d');
 
-let visualization = null;
-let api = null;
-let browserInference = null;
-let browserReady = false;
+const shirtColorInput = document.getElementById('shirt-color');
+const textColorInput = document.getElementById('text-color');
+const shirtTextInput = document.getElementById('shirt-text');
+const sizeBtns = document.querySelectorAll('.size-btn');
+const addToCartBtn = document.getElementById('add-to-cart');
+const toastEl = document.getElementById('toast');
 
-const genTexts = [
-    'Summoning planets...',
-    'Stirring the cosmos...',
-    'Whispering to the stars...',
-    'Bending spacetime...',
-    'Charming gravity...',
-    'Dusting off nebula...',
-];
+let selectedSize = 'L';
 
-document.addEventListener("DOMContentLoaded", async () => {
-    api = new SpaceSimulationAPI();
-    browserInference = new BrowserInference();
-    visualization = new SpaceVisualization("canvas-container");
+const SHIRT_COLLAR_MODEL = 'ULM-2025';
 
-    setupEventListeners();
+function drawShirt() {
+    const w = canvas.width;
+    const h = canvas.height;
+    const shirtColor = shirtColorInput.value;
+    const textColor = textColorInput.value;
+    const text = shirtTextInput.value.trim() || 'Your Logo';
 
-    await generateSystem();
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 8;
+
+    ctx.beginPath();
+    ctx.moveTo(w * 0.28, h * 0.05);
+    ctx.quadraticCurveTo(w * 0.35, h * 0.01, w * 0.4, h * 0.05);
+    ctx.lineTo(w * 0.4, h * 0.13);
+
+    ctx.quadraticCurveTo(w * 0.32, h * 0.16, w * 0.08, h * 0.06);
+    ctx.quadraticCurveTo(w * 0.04, h * 0.10, w * 0.10, h * 0.20);
+
+    ctx.lineTo(w * 0.22, h * 0.94);
+    ctx.quadraticCurveTo(w * 0.24, h * 0.99, w * 0.30, h);
+
+    ctx.lineTo(w * 0.70, h);
+    ctx.quadraticCurveTo(w * 0.76, h * 0.99, w * 0.78, h * 0.94);
+
+    ctx.lineTo(w * 0.90, h * 0.20);
+    ctx.quadraticCurveTo(w * 0.96, h * 0.10, w * 0.92, h * 0.06);
+    ctx.quadraticCurveTo(w * 0.68, h * 0.16, w * 0.60, h * 0.13);
+    ctx.lineTo(w * 0.60, h * 0.05);
+    ctx.quadraticCurveTo(w * 0.65, h * 0.01, w * 0.72, h * 0.05);
+
+    ctx.closePath();
+    ctx.restore();
+
+    ctx.fillStyle = shirtColor;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    const r = parseInt(shirtColor.slice(1,3), 16);
+    const g = parseInt(shirtColor.slice(3,5), 16);
+    const b = parseInt(shirtColor.slice(5,7), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    const highlight = luminance > 0.5 ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)';
+    ctx.beginPath();
+    ctx.moveTo(w * 0.35, h * 0.06);
+    ctx.quadraticCurveTo(w * 0.45, h * 0.30, w * 0.40, h * 0.45);
+    ctx.quadraticCurveTo(w * 0.35, h * 0.30, w * 0.28, h * 0.06);
+    ctx.closePath();
+    ctx.fillStyle = highlight;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(w * 0.55, h * 0.50);
+    ctx.quadraticCurveTo(w * 0.65, h * 0.65, w * 0.72, h * 0.50);
+    ctx.quadraticCurveTo(w * 0.65, h * 0.55, w * 0.55, h * 0.50);
+    ctx.closePath();
+    ctx.fillStyle = highlight;
+    ctx.fill();
+
+    const fontSize = Math.min(w, h) * 0.06;
+    ctx.fillStyle = textColor;
+    ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const maxWidth = w * 0.55;
+    let displayText = text;
+    if (ctx.measureText(displayText).width > maxWidth) {
+        while (ctx.measureText(displayText + '…').width > maxWidth && displayText.length > 1) {
+            displayText = displayText.slice(0, -1);
+        }
+        displayText += '…';
+    }
+
+    const textY = h * 0.58;
+    ctx.shadowColor = 'rgba(0,0,0,0.2)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 1;
+    ctx.fillText(displayText.toUpperCase(), w / 2, textY);
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = textColor;
+    ctx.globalAlpha = 0.15;
+    ctx.font = `bold ${fontSize * 0.3}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.fillText(SHIRT_COLLAR_MODEL, w / 2, h * 0.23);
+    ctx.globalAlpha = 1;
+}
+
+function updateShirt() {
+    drawShirt();
+}
+
+shirtColorInput.addEventListener('input', updateShirt);
+textColorInput.addEventListener('input', updateShirt);
+shirtTextInput.addEventListener('input', updateShirt);
+
+sizeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        sizeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedSize = btn.dataset.size;
+    });
 });
 
-function setupEventListeners() {
-    document.getElementById("generate-btn").addEventListener("click", async () => {
-        await generateSystem();
-    });
-
-    document.getElementById("pause-btn").addEventListener("click", () => {
-        if (visualization.isPlaying) {
-            visualization.pause();
-            setPauseIcon(false);
-        } else {
-            visualization.play();
-            setPauseIcon(true);
-        }
-    });
-
-    const speedSlider = document.getElementById("speed-slider");
-    const speedLabel = document.getElementById("speed-label");
-    if (speedSlider) {
-        speedSlider.addEventListener("input", () => {
-            const m = parseFloat(speedSlider.value);
-            visualization.setPlaybackSpeed(m);
-            speedLabel.textContent = `${m}×`;
-        });
-    }
-}
-
-function setPauseIcon(playing) {
-    const btn = document.getElementById("pause-btn");
-    btn.innerHTML = playing
-        ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
-        : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
-    btn.setAttribute("aria-label", playing ? "Pause" : "Play");
-}
+let toastTimeout;
 
 function toast(msg, duration = 2500) {
-    const el = document.getElementById("toast");
-    el.textContent = msg;
-    el.classList.remove("hidden");
-    clearTimeout(el._timeout);
-    el._timeout = setTimeout(() => el.classList.add("hidden"), duration);
+    toastEl.textContent = msg;
+    toastEl.classList.remove('hidden');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toastEl.classList.add('hidden'), duration);
 }
 
-async function generateSystem() {
-    const generateBtn = document.getElementById("generate-btn");
-    generateBtn.disabled = true;
+addToCartBtn.addEventListener('click', () => {
+    const text = shirtTextInput.value.trim();
+    const shirtColor = shirtColorInput.value;
+    const textColorVal = textColorInput.value;
+    const productId = 123;
+    const baseUrl = 'https://ulmproductions.org/cart/';
 
-    const overlay = document.getElementById("generating-overlay");
-    const genText = document.getElementById("generating-text");
-    overlay.classList.remove("hidden");
+    const params = new URLSearchParams({
+        'add-to-cart': productId,
+        'quantity': 1,
+        'merch_text': text || 'ULM',
+        'merch_shirt_color': shirtColor,
+        'merch_text_color': textColorVal,
+        'merch_size': selectedSize,
+    });
 
-    let textIndex = 0;
-    const textInterval = setInterval(() => {
-        textIndex = (textIndex + 1) % genTexts.length;
-        genText.textContent = genTexts[textIndex];
-    }, 3000);
+    const cartUrl = `${baseUrl}?${params.toString()}`;
 
-    try {
-        const centralMass = 0.1;
-        const numBodies = Math.floor(Math.random() * 6) + 3;
-        const temperature = 0.67;
+    navigator.clipboard.writeText(cartUrl).then(() => {
+        toast('📋 Cart URL copied! Paste it to test the WooCommerce flow.');
+    }).catch(() => {
+        toast('📋 ' + cartUrl);
+    });
+});
 
-        const safeMass = Math.max(centralMass, PHYSICS.CENTRAL_MASS_MIN);
-        const simDt = PHYSICS.SIMULATION_DT_DEFAULT * (PHYSICS.MASS_RATIO / safeMass);
-
-        let systemData;
-
-        try {
-            await warmBrowserModel();
-            systemData = await browserInference.generateSystem(
-                {
-                    central_mass: centralMass,
-                    num_bodies: numBodies,
-                    temperature: temperature,
-                    top_k: API_DEFAULTS.TOP_K,
-                    simulation_timesteps: PHYSICS.SIMULATION_TIMESTEPS,
-                    simulation_dt: simDt
-                },
-                {
-                    onProgress: async (partialSystem, progress) => {
-                        genText.textContent = `Received ${progress.completedPlanets}/${progress.totalPlanets} planets...`;
-                        visualization.loadSystem(partialSystem);
-                        updatePlanetCount(partialSystem);
-                    }
-                }
-            );
-        } catch (error) {
-            console.warn("Browser inference failed, trying server:", error);
-            genText.textContent = 'Contacting the observatory...';
-            systemData = await api.generateSystem({
-                central_mass: centralMass,
-                num_bodies: numBodies,
-                temperature: temperature,
-                simulation_timesteps: PHYSICS.SIMULATION_TIMESTEPS,
-                simulation_dt: simDt
-            });
-        }
-
-        if (!systemData) {
-            toast("No system returned — try again!");
-            return;
-        }
-
-        visualization.loadSystem(systemData);
-        updatePlanetCount(systemData);
-        setPauseIcon(true);
-
-        const trailModes = ['long', 'short'];
-        const displayModes = ['both', 'planets-only', 'trails-only'];
-        const trailMode = trailModes[Math.floor(Math.random() * trailModes.length)];
-        const displayMode = displayModes[Math.floor(Math.random() * displayModes.length)];
-        visualization.setTrailMode(trailMode);
-        visualization.setDisplayMode(displayMode);
-
-        const trailLabel = trailMode === 'long' ? 'streaming trails' : 'crisp orbits';
-        const displayLabel = displayMode === 'both' ? '' : displayMode === 'planets-only' ? ' · naked planets' : ' · just trails';
-        toast(`🪐 ${Math.max(0, systemData.bodies.length - 1)} planets · ${trailLabel}${displayLabel}`);
-    } catch (e) {
-        console.error("Generation error:", e);
-        toast("Something went wrong — try again!");
-    } finally {
-        clearInterval(textInterval);
-        overlay.classList.add("hidden");
-        generateBtn.disabled = false;
-    }
-}
-
-function updatePlanetCount(systemData) {
-    const count = Math.max(0, systemData.bodies.length - 1);
-    document.getElementById("planet-count").textContent = `🪐 ${count} planet${count !== 1 ? 's' : ''}`;
-}
-
-async function warmBrowserModel() {
-    if (browserReady) return;
-    try {
-        await browserInference.init();
-        browserReady = true;
-    } catch (error) {
-        browserReady = false;
-        throw error;
-    }
-}
+updateShirt();
