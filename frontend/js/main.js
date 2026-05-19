@@ -84,9 +84,9 @@ async function generateSystem() {
     }, 3000);
 
     try {
-        const centralMass = +(0.1 + Math.random() * 0.5).toFixed(2);
-        const numBodies = Math.floor(Math.random() * 6) + 3;
-        const temperature = +(0.4 + Math.random() * 0.5).toFixed(2);
+        const centralMass = 0.1;
+        const numBodies = 8;
+        const temperature = 0.67;
 
         const safeMass = Math.max(centralMass, PHYSICS.CENTRAL_MASS_MIN);
         const simDt = PHYSICS.SIMULATION_DT_DEFAULT * (PHYSICS.MASS_RATIO / safeMass);
