@@ -8,12 +8,6 @@ let api = null;
 let browserInference = null;
 let browserReady = false;
 
-const vibes = [
-    'chaotic orbits ahead', 'a quiet corner', 'tidal love', 'gravity wins',
-    'cosmic ballet', 'solar jazz', 'dusty neighbors', 'resonant hearts',
-    'wandering giants', 'tiny & fierce', 'eccentric crew', 'just formed',
-];
-
 const genTexts = [
     'Summoning planets...',
     'Stirring the cosmos...',
@@ -147,9 +141,8 @@ async function generateSystem() {
         visualization.setDisplayMode(displayMode);
 
         const trailLabel = trailMode === 'long' ? 'streaming trails' : 'crisp orbits';
-        const displayLabel = displayMode === 'both' ? '' : displayMode === 'planets-only' ? ' — naked planets' : ' — just trails';
-        const vibe = vibes[Math.floor(Math.random() * vibes.length)];
-        toast(`🪐 ${Math.max(0, systemData.bodies.length - 1)} planets · ${trailLabel}${displayLabel} — ${vibe}`);
+        const displayLabel = displayMode === 'both' ? '' : displayMode === 'planets-only' ? ' · naked planets' : ' · just trails';
+        toast(`🪐 ${Math.max(0, systemData.bodies.length - 1)} planets · ${trailLabel}${displayLabel}`);
     } catch (e) {
         console.error("Generation error:", e);
         toast("Something went wrong — try again!");
