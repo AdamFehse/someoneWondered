@@ -987,12 +987,7 @@ class SpaceVisualization {
     }
 
     getStarfieldColor() {
-        const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (dark) {
-            return 0xffffff;
-        } else {
-            return 0x9966cc;
-        }
+        return 0xffffff;
     }
 
     updateTheme() {

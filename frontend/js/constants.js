@@ -4,6 +4,7 @@
  */
 
 function isDarkMode() {
+    if (document.body && document.body.classList.contains('sim-page')) return true;
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
