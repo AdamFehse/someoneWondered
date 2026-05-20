@@ -6,7 +6,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f4f5f7;
+    background: linear-gradient(135deg, #f7f3ed 0%, #efe9e0 100%);
     color: #1a1a2e;
     min-height: 100vh;
     -webkit-tap-highlight-color: transparent;
@@ -46,17 +46,17 @@ header h1 {
 .nav-link {
     margin-left: auto;
     font-size: 0.8rem;
-    color: #888;
+    color: #8a7e72;
     text-decoration: none;
     padding: 0.3rem 0.7rem;
     border-radius: 999px;
-    border: 1px solid #ddd;
+    border: 1px solid #e0d8ce;
     transition: all 0.2s;
 }
 
 .nav-link:hover {
-    border-color: #999;
-    color: #555;
+    border-color: #c0b8ae;
+    color: #5a4e42;
 }
 
 main {
@@ -74,7 +74,7 @@ main {
     width: 100%;
     height: auto;
     display: block;
-    filter: drop-shadow(0 4px 24px rgba(0,0,0,0.08));
+    filter: drop-shadow(0 8px 32px rgba(0,0,0,0.10));
 }
 
 #shirt-text-overlay {
@@ -103,10 +103,11 @@ main {
 }
 
 .card {
-    background: #fff;
+    background: #fcfaf7;
     border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    border: 1px solid #e8e0d6;
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -135,7 +136,7 @@ main {
 .field input[type="color"] {
     width: 100%;
     height: 52px;
-    border: 2px solid #e8e8ec;
+    border: 2px solid #e0d8ce;
     border-radius: 10px;
     background: none;
     cursor: pointer;
@@ -144,7 +145,7 @@ main {
 }
 
 .field input[type="color"]:hover {
-    border-color: #ccc;
+    border-color: #c0b8ae;
 }
 
 .field input[type="color"]::-webkit-color-swatch-wrapper {
@@ -159,7 +160,7 @@ main {
 .field input[type="text"] {
     width: 100%;
     padding: 0.75rem 0.9rem;
-    border: 2px solid #e8e8ec;
+    border: 2px solid #e0d8ce;
     border-radius: 10px;
     font-size: 1rem;
     font-weight: 600;
@@ -185,9 +186,9 @@ main {
 .size-btn {
     width: 52px;
     height: 52px;
-    border: 2px solid #e8e8ec;
+    border: 2px solid #e0d8ce;
     border-radius: 10px;
-    background: #fff;
+    background: #fcfaf7;
     color: #1a1a2e;
     font-size: 0.9rem;
     font-weight: 600;
