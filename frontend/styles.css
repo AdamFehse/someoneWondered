@@ -1,3 +1,59 @@
+:root {
+    --bg: #f7f3ed;
+    --bg-end: #efe9e0;
+    --text: #1a1a2e;
+    --text-muted: #888;
+    --text-link: #8a7e72;
+    --card-bg: #fcfaf7;
+    --card-border: #e8e0d6;
+    --input-border: #e0d8ce;
+    --input-border-hover: #c0b8ae;
+    --input-bg: #fff;
+    --input-text: #1a1a2e;
+    --input-placeholder: #bbb;
+    --btn-bg: #fcfaf7;
+    --btn-active-bg: #1a1a2e;
+    --btn-active-text: #fff;
+    --primary: #1a1a2e;
+    --primary-hover: #2a2a4e;
+    --toast-bg: #1a1a2e;
+    --toast-text: #fff;
+    --shirt-text: #ffffff;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-toast: 0 4px 20px rgba(0,0,0,0.15);
+    --shadow-btn: 0 4px 16px rgba(26, 26, 46, 0.2);
+    --shadow-shirt: 0 8px 32px rgba(0,0,0,0.10);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0e0e12;
+        --bg-end: #16161d;
+        --text: #e8e6e1;
+        --text-muted: #777;
+        --text-link: #a89e94;
+        --card-bg: #1a1a24;
+        --card-border: #2a2a36;
+        --input-border: #2a2a36;
+        --input-border-hover: #3a3a48;
+        --input-bg: #14141c;
+        --input-text: #e8e6e1;
+        --input-placeholder: #555;
+        --btn-bg: #1a1a24;
+        --btn-active-bg: #e8e6e1;
+        --btn-active-text: #1a1a2e;
+        --primary: #e8e6e1;
+        --primary-hover: #d0cec9;
+        --toast-bg: #e8e6e1;
+        --toast-text: #1a1a2e;
+        --shirt-text: #e8e6e1;
+        --shadow-card: 0 4px 24px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+        --shadow-toast: 0 4px 20px rgba(0,0,0,0.4);
+        --shadow-btn: 0 4px 16px rgba(232, 230, 225, 0.15);
+        --shadow-shirt: 0 8px 32px rgba(0,0,0,0.4);
+    }
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,8 +62,8 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #f7f3ed 0%, #efe9e0 100%);
-    color: #1a1a2e;
+    background: linear-gradient(135deg, var(--bg) 0%, var(--bg-end) 100%);
+    color: var(--text);
     min-height: 100vh;
     -webkit-tap-highlight-color: transparent;
 }
@@ -39,24 +95,24 @@ header h1 {
 
 .tag {
     font-size: 0.8rem;
-    color: #888;
+    color: var(--text-muted);
     font-weight: 500;
 }
 
 .nav-link {
     margin-left: auto;
     font-size: 0.8rem;
-    color: #8a7e72;
+    color: var(--text-link);
     text-decoration: none;
     padding: 0.3rem 0.7rem;
     border-radius: 999px;
-    border: 1px solid #e0d8ce;
+    border: 1px solid var(--input-border);
     transition: all 0.2s;
 }
 
 .nav-link:hover {
-    border-color: #c0b8ae;
-    color: #5a4e42;
+    border-color: var(--input-border-hover);
+    color: var(--text-link);
 }
 
 main {
@@ -67,34 +123,22 @@ main {
 
 #shirt-preview {
     flex: 0 0 360px;
-    position: relative;
-}
-
-#shirt-svg {
-    width: 100%;
-    height: auto;
-    display: block;
-    filter: drop-shadow(0 8px 32px rgba(0,0,0,0.10));
-}
-
-#shirt-text-overlay {
-    position: absolute;
-    top: 58%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-weight: 800;
-    font-size: 1.4rem;
-    color: #ffffff;
-    text-align: center;
-    width: 60%;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    pointer-events: none;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    white-space: nowrap;
+    height: 460px;
+    border-radius: 16px;
     overflow: hidden;
-    text-overflow: ellipsis;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-card);
+}
+
+#three-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#three-canvas canvas {
+    display: block;
 }
 
 #controls {
@@ -103,11 +147,11 @@ main {
 }
 
 .card {
-    background: #fcfaf7;
+    background: var(--card-bg);
     border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
-    border: 1px solid #e8e0d6;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--card-border);
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -127,7 +171,7 @@ main {
     display: block;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #888;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 0.4rem;
@@ -136,7 +180,7 @@ main {
 .field input[type="color"] {
     width: 100%;
     height: 52px;
-    border: 2px solid #e0d8ce;
+    border: 2px solid var(--input-border);
     border-radius: 10px;
     background: none;
     cursor: pointer;
@@ -145,7 +189,7 @@ main {
 }
 
 .field input[type="color"]:hover {
-    border-color: #c0b8ae;
+    border-color: var(--input-border-hover);
 }
 
 .field input[type="color"]::-webkit-color-swatch-wrapper {
@@ -160,22 +204,22 @@ main {
 .field input[type="text"] {
     width: 100%;
     padding: 0.75rem 0.9rem;
-    border: 2px solid #e0d8ce;
+    border: 2px solid var(--input-border);
     border-radius: 10px;
     font-size: 1rem;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--input-text);
     outline: none;
     transition: border-color 0.2s;
-    background: #fff;
+    background: var(--input-bg);
 }
 
 .field input[type="text"]:focus {
-    border-color: #1a1a2e;
+    border-color: var(--text);
 }
 
 .field input[type="text"]::placeholder {
-    color: #bbb;
+    color: var(--input-placeholder);
 }
 
 .sizes {
@@ -186,10 +230,10 @@ main {
 .size-btn {
     width: 52px;
     height: 52px;
-    border: 2px solid #e0d8ce;
+    border: 2px solid var(--input-border);
     border-radius: 10px;
-    background: #fcfaf7;
-    color: #1a1a2e;
+    background: var(--btn-bg);
+    color: var(--text);
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
@@ -197,13 +241,13 @@ main {
 }
 
 .size-btn:hover {
-    border-color: #1a1a2e;
+    border-color: var(--text);
 }
 
 .size-btn.active {
-    border-color: #1a1a2e;
-    background: #1a1a2e;
-    color: #fff;
+    border-color: var(--text);
+    background: var(--btn-active-bg);
+    color: var(--btn-active-text);
 }
 
 #add-to-cart {
@@ -211,8 +255,8 @@ main {
     padding: 0.9rem;
     border: none;
     border-radius: 999px;
-    background: #1a1a2e;
-    color: #fff;
+    background: var(--primary);
+    color: var(--btn-active-text);
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
@@ -221,9 +265,9 @@ main {
 }
 
 #add-to-cart:hover {
-    background: #2a2a4e;
+    background: var(--primary-hover);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(26, 26, 46, 0.2);
+    box-shadow: var(--shadow-btn);
 }
 
 #add-to-cart:active {
@@ -236,14 +280,14 @@ main {
     left: 50%;
     transform: translateX(-50%);
     z-index: 300;
-    background: #1a1a2e;
-    color: #fff;
+    background: var(--toast-bg);
+    color: var(--toast-text);
     padding: 0.7rem 1.4rem;
     border-radius: 999px;
     font-size: 0.85rem;
     font-weight: 500;
     transition: opacity 0.25s, transform 0.25s;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-toast);
     white-space: nowrap;
 }
 
@@ -265,7 +309,9 @@ main {
 
     #shirt-preview {
         flex: 0 0 auto;
-        width: 260px;
+        width: 100%;
+        max-width: 400px;
+        height: 400px;
     }
 
     #controls {
@@ -280,20 +326,12 @@ main {
     header h1 {
         font-size: 1rem;
     }
-
-    #shirt-text-overlay {
-        font-size: 1.1rem;
-        width: 55%;
-    }
 }
 
 @media (max-width: 400px) {
     #shirt-preview {
-        width: 200px;
-    }
-
-    #shirt-text-overlay {
-        font-size: 0.9rem;
+        width: 100%;
+        height: 320px;
     }
 
     .size-btn {
