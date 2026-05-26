@@ -939,26 +939,33 @@ class SpaceVisualization {
     }
 
     updateSelectionHighlights() {
-        if (this.selection.bodyIndex === null || !this.selection.highlightRing) return;
+        // Update selection ring
+        if (this.selection.bodyIndex !== null && this.selection.highlightRing) {
+            const body = this.bodies[this.selection.bodyIndex];
+            const ring = this.selection.highlightRing;
+            ring.position.copy(body.mesh.position);
+            this._rotateAndPulseRing(ring);
+        }
 
-        const body = this.bodies[this.selection.bodyIndex];
-        const ring = this.selection.highlightRing;
+        // Update hover ring
+        if (this.selection.hoverBodyIndex !== null && this.selection.hoverRing) {
+            const body = this.bodies[this.selection.hoverBodyIndex];
+            const ring = this.selection.hoverRing;
+            ring.position.copy(body.mesh.position);
+            const rotationSpeed = ANIMATION.ROTATION_SPEED;
+            ring.rotation.x += rotationSpeed * 0.2;
+            ring.rotation.y += rotationSpeed * 0.6;
+        }
+    }
 
-        // Position ring at body location
-        ring.position.copy(body.mesh.position);
-
-        // Rotate ring (0.5 RPM = ~3 degrees per frame at 60fps)
-        const rotationSpeed = ANIMATION.ROTATION_SPEED; // Radians per frame
+    _rotateAndPulseRing(ring) {
+        const rotationSpeed = ANIMATION.ROTATION_SPEED;
         ring.rotation.x += rotationSpeed * ANIMATION.HIGHLIGHT_ROTATION_X_FACTOR;
         ring.rotation.y += rotationSpeed * ANIMATION.HIGHLIGHT_ROTATION_Y_FACTOR;
         ring.rotation.z += rotationSpeed * ANIMATION.HIGHLIGHT_ROTATION_Z_FACTOR;
-
-        // Pulse opacity
         const elapsedSeconds = (Date.now() - ring.userData.creationTime) / 1000;
-        const pulse = ANIMATION.PULSE_MIN + (ANIMATION.PULSE_MAX - ANIMATION.PULSE_MIN) * Math.sin(elapsedSeconds * ANIMATION.PULSE_FREQUENCY);  // Oscillates between min and max
+        const pulse = ANIMATION.PULSE_MIN + (ANIMATION.PULSE_MAX - ANIMATION.PULSE_MIN) * Math.sin(elapsedSeconds * ANIMATION.PULSE_FREQUENCY);
         ring.material.opacity = pulse;
-
-        // Orbit path is already centered at star (origin), no need to reposition
     }
 
     calculateScaleFactor(trajectories) {
