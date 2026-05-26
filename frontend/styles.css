@@ -341,6 +341,38 @@ main {
     }
 }
 
+/* Mode Toggle (Sim / Tycoon) */
+#mode-toggle {
+    display: flex;
+    gap: 0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 999px;
+    padding: 2px;
+}
+
+.mode-btn {
+    padding: 0.3rem 0.75rem;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mode-btn:hover {
+    color: rgba(255,255,255,0.8);
+}
+
+.mode-btn.active {
+    background: rgba(0,170,255,0.2);
+    color: #00ccff;
+    box-shadow: 0 0 12px rgba(0,170,255,0.2);
+}
+
 /* ===== Space sim page ===== */
 .sim-page {
     background: #000 !important;
