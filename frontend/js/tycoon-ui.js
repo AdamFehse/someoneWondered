@@ -199,22 +199,6 @@ export class TycoonUI {
           }
         }
       });
-
-      if (isPlanetIdx) {
-        el.addEventListener('mouseenter', () => {
-          if (window._visualization) {
-            window._visualization.hoverBody(id);
-          }
-          el.classList.add('hover');
-        });
-
-        el.addEventListener('mouseleave', () => {
-          if (window._visualization) {
-            window._visualization.unhoverBody();
-          }
-          el.classList.remove('hover');
-        });
-      }
     });
   }
 

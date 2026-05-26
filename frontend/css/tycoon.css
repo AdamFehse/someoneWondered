@@ -163,14 +163,7 @@
   text-decoration: line-through;
 }
 
-.planet-list-item.hover {
-  background: rgba(0, 170, 255, 0.18) !important;
-  border-color: rgba(0, 170, 255, 0.4) !important;
-}
 
-.planet-list-item.hover .planet-list-name {
-  color: #fff;
-}
 
 .planet-dot {
   font-size: 14px;

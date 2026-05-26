@@ -176,8 +176,6 @@ class SpaceVisualization {
             highlightRing: null,
             orbitPath: null,
             originalTrailColors: null,
-            hoverRing: null,
-            hoverBodyIndex: null,
         };
 
         // Raycasting for click detection
@@ -320,35 +318,6 @@ class SpaceVisualization {
 
         // Hide selection UI
         this.hideSelectionUI();
-    }
-
-    hoverBody(bodyIndex) {
-        if (this.selection.hoverBodyIndex === bodyIndex) return;
-        this.unhoverBody();
-        if (bodyIndex < 0 || bodyIndex >= this.bodies.length) return;
-        const body = this.bodies[bodyIndex];
-        if (body.type === 'star') return; // Don't hover the star
-
-        this.selection.hoverBodyIndex = bodyIndex;
-        const ring = this.createHighlightRing(body);
-        // Make the hover ring whiter/brighter and more transparent
-        ring.material.opacity = 0.4;
-        ring.material.emissiveIntensity = 1.2;
-        // Tint white
-        ring.material.color.setHex(0xffffff);
-        ring.material.emissive.setHex(0x44aaff);
-        this.selection.hoverRing = ring;
-        this.scene.add(ring);
-    }
-
-    unhoverBody() {
-        if (this.selection.hoverRing) {
-            this.scene.remove(this.selection.hoverRing);
-            this.selection.hoverRing.geometry.dispose();
-            this.selection.hoverRing.material.dispose();
-            this.selection.hoverRing = null;
-        }
-        this.selection.hoverBodyIndex = null;
     }
 
     updateSelectionUI(bodyIndex) {
@@ -939,30 +908,21 @@ class SpaceVisualization {
     }
 
     updateSelectionHighlights() {
-        // Update selection ring
-        if (this.selection.bodyIndex !== null && this.selection.highlightRing) {
-            const body = this.bodies[this.selection.bodyIndex];
-            const ring = this.selection.highlightRing;
-            ring.position.copy(body.mesh.position);
-            this._rotateAndPulseRing(ring);
-        }
+        if (this.selection.bodyIndex === null || !this.selection.highlightRing) return;
 
-        // Update hover ring
-        if (this.selection.hoverBodyIndex !== null && this.selection.hoverRing) {
-            const body = this.bodies[this.selection.hoverBodyIndex];
-            const ring = this.selection.hoverRing;
-            ring.position.copy(body.mesh.position);
-            const rotationSpeed = ANIMATION.ROTATION_SPEED;
-            ring.rotation.x += rotationSpeed * 0.2;
-            ring.rotation.y += rotationSpeed * 0.6;
-        }
-    }
+        const body = this.bodies[this.selection.bodyIndex];
+        const ring = this.selection.highlightRing;
 
-    _rotateAndPulseRing(ring) {
-        const rotationSpeed = ANIMATION.ROTATION_SPEED;
+        // Position ring at body location
+        ring.position.copy(body.mesh.position);
+
+        // Rotate ring (0.5 RPM = ~3 degrees per frame at 60fps)
+        const rotationSpeed = ANIMATION.ROTATION_SPEED; // Radians per frame
         ring.rotation.x += rotationSpeed * ANIMATION.HIGHLIGHT_ROTATION_X_FACTOR;
         ring.rotation.y += rotationSpeed * ANIMATION.HIGHLIGHT_ROTATION_Y_FACTOR;
         ring.rotation.z += rotationSpeed * ANIMATION.HIGHLIGHT_ROTATION_Z_FACTOR;
+
+        // Pulse opacity
         const elapsedSeconds = (Date.now() - ring.userData.creationTime) / 1000;
         const pulse = ANIMATION.PULSE_MIN + (ANIMATION.PULSE_MAX - ANIMATION.PULSE_MIN) * Math.sin(elapsedSeconds * ANIMATION.PULSE_FREQUENCY);
         ring.material.opacity = pulse;
@@ -1004,7 +964,6 @@ class SpaceVisualization {
     }
 
     clearBodies() {
-        this.unhoverBody();
         for (const body of this.bodies) {
             this.scene.remove(body.mesh);
             if (body.trail) {
