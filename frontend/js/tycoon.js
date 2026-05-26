@@ -265,12 +265,12 @@ export class SpaceTycoon {
         color: visualization.bodies[i] ? visualization.bodies[i].color : 0x4a90e2,
         mass,
         orbital: orbitalElem ? {
-          semi_major_axis: orbital_elem.semi_major_axis || 1,
-          eccentricity: orbital_elem.eccentricity || 0,
-          inclination: orbital_elem.inclination || 0,
-          longitude_ascending_node: orbital_elem.longitude_ascending_node || orbital_elem.long_ascending_node || 0,
-          argument_periapsis: orbital_elem.argument_periapsis || orbital_elem.arg_periapsis || 0,
-          mean_anomaly: orbital_elem.mean_anomaly || 0,
+          semi_major_axis: orbitalElem.semi_major_axis || 1,
+          eccentricity: orbitalElem.eccentricity || 0,
+          inclination: orbitalElem.inclination || 0,
+          longitude_ascending_node: orbitalElem.longitude_ascending_node || orbitalElem.long_ascending_node || 0,
+          argument_periapsis: orbitalElem.argument_periapsis || orbitalElem.arg_periapsis || 0,
+          mean_anomaly: orbitalElem.mean_anomaly || 0,
         } : null,
         stats: {
           habitability,
