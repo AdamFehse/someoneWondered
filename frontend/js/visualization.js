@@ -175,7 +175,9 @@ class SpaceVisualization {
             bodyIndex: null,
             highlightRing: null,
             orbitPath: null,
-            originalTrailColors: null
+            originalTrailColors: null,
+            hoverRing: null,
+            hoverBodyIndex: null,
         };
 
         // Raycasting for click detection
@@ -318,6 +320,35 @@ class SpaceVisualization {
 
         // Hide selection UI
         this.hideSelectionUI();
+    }
+
+    hoverBody(bodyIndex) {
+        if (this.selection.hoverBodyIndex === bodyIndex) return;
+        this.unhoverBody();
+        if (bodyIndex < 0 || bodyIndex >= this.bodies.length) return;
+        const body = this.bodies[bodyIndex];
+        if (body.type === 'star') return; // Don't hover the star
+
+        this.selection.hoverBodyIndex = bodyIndex;
+        const ring = this.createHighlightRing(body);
+        // Make the hover ring whiter/brighter and more transparent
+        ring.material.opacity = 0.4;
+        ring.material.emissiveIntensity = 1.2;
+        // Tint white
+        ring.material.color.setHex(0xffffff);
+        ring.material.emissive.setHex(0x44aaff);
+        this.selection.hoverRing = ring;
+        this.scene.add(ring);
+    }
+
+    unhoverBody() {
+        if (this.selection.hoverRing) {
+            this.scene.remove(this.selection.hoverRing);
+            this.selection.hoverRing.geometry.dispose();
+            this.selection.hoverRing.material.dispose();
+            this.selection.hoverRing = null;
+        }
+        this.selection.hoverBodyIndex = null;
     }
 
     updateSelectionUI(bodyIndex) {
@@ -966,6 +997,7 @@ class SpaceVisualization {
     }
 
     clearBodies() {
+        this.unhoverBody();
         for (const body of this.bodies) {
             this.scene.remove(body.mesh);
             if (body.trail) {
