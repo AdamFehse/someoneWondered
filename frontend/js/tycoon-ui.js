@@ -186,18 +186,61 @@ export class TycoonUI {
 
     body.innerHTML = html;
 
-    // Wire click handlers
+    // Wire click + hover handlers
     body.querySelectorAll('.planet-list-item').forEach(el => {
+      const id = parseInt(el.dataset.planet);
+      const isPlanetIdx = !isNaN(id) && id > 0;
+
       el.addEventListener('click', () => {
-        const id = parseInt(el.dataset.planet);
-        if (!isNaN(id)) {
+        if (isPlanetIdx) {
           this.selectPlanet(id);
-          // Also select in visualization for highlight ring
           if (window._visualization && window._visualization.selection.bodyIndex !== id) {
             window._visualization.selectBody(id);
           }
         }
       });
+
+      if (isPlanetIdx) {
+        el.addEventListener('mouseenter', () => {
+          // Pulse the 3D planet mesh on hover
+          const body = window._visualization?.bodies?.[id];
+          if (body && body.mesh) {
+            body.mesh.userData.hoverScale = 1.8;
+            const start = performance.now();
+            const orig = body.mesh.userData.originalScale ?? body.mesh.scale.x;
+            body.mesh.userData.originalScale = orig;
+            const animate = (now) => {
+              if (!body.mesh.userData.hoverScale) return; // unhover stopped it
+              const t = Math.min(1, (now - start) / 150);
+              const s = orig + (body.mesh.userData.hoverScale - orig) * t;
+              body.mesh.scale.setScalar(s);
+              if (t < 1) requestAnimationFrame(animate);
+            };
+            requestAnimationFrame(animate);
+          }
+          el.classList.add('hover');
+        });
+
+        el.addEventListener('mouseleave', () => {
+          const body = window._visualization?.bodies?.[id];
+          if (body && body.mesh) {
+            body.mesh.userData.hoverScale = null;
+            const start = performance.now();
+            const current = body.mesh.scale.x;
+            const orig = body.mesh.userData.originalScale ?? 1;
+            const animate = (now) => {
+              if (body.mesh.userData.hoverScale) return; // re-hovered
+              const t = Math.min(1, (now - start) / 150);
+              const s = current + (orig - current) * t;
+              body.mesh.scale.setScalar(s);
+              if (t < 1) requestAnimationFrame(animate);
+              else body.mesh.scale.setScalar(orig);
+            };
+            requestAnimationFrame(animate);
+          }
+          el.classList.remove('hover');
+        });
+      }
     });
   }
 
