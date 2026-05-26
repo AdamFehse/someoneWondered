@@ -81,6 +81,11 @@ export class TycoonUI {
         <div class="res-item" data-res="energy"><span class="res-icon">⚡</span><span class="res-val">0</span></div>
       </div>
 
+      <div id="tycoon-planet-list" class="tycoon-panel tycoon-planet-list">
+        <div class="panel-header"><span>🪐 System</span></div>
+        <div class="panel-body planet-list-body"></div>
+      </div>
+
       <div id="tycoon-panels" class="tycoon-panels">
         <div id="tycoon-planet-panel" class="tycoon-panel tycoon-planet-panel hidden">
           <div class="panel-header">
@@ -135,6 +140,7 @@ export class TycoonUI {
 
   _renderAll() {
     this._renderResources();
+    this._renderPlanetList();
     this._renderTech();
     this._renderEvents();
     this._renderScore();
@@ -152,6 +158,47 @@ export class TycoonUI {
       const valEl = item.querySelector('.res-val');
       if (valEl) valEl.textContent = Math.floor(res[key] || 0);
     }
+  }
+
+  _renderPlanetList() {
+    if (!this.container || !this.tycoon.state) return;
+    const body = this.container.querySelector('.planet-list-body');
+    if (!body) return;
+
+    const planets = this.tycoon.state.planets;
+    const star = this.tycoon.state.star;
+
+    let html = `<div class="planet-list-star"><span class="star-class">${star.type.class}</span> ${star.name}</div>`;
+
+    for (const planet of planets) {
+      const selected = this.selectedPlanetId === planet.id ? ' selected' : '';
+      const colonized = planet.colony ? ' colonized' : '';
+      const ejected = planet.stats.stability <= 0 ? ' ejected' : '';
+      html += `
+        <div class="planet-list-item${selected}${colonized}${ejected}" data-planet="${planet.id}">
+          <span class="planet-dot" style="color:#${planet.color.toString(16).padStart(6, '0')}">${planet.type.emoji}</span>
+          <span class="planet-list-name">${planet.name}</span>
+          <span class="planet-list-type">${planet.type.label}</span>
+          ${planet.colony ? '<span class="planet-colony-badge">🏛</span>' : ''}
+          ${planet.stats.stability <= 0 ? '<span class="planet-ejected-badge">💥</span>' : ''}
+        </div>`;
+    }
+
+    body.innerHTML = html;
+
+    // Wire click handlers
+    body.querySelectorAll('.planet-list-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = parseInt(el.dataset.planet);
+        if (!isNaN(id)) {
+          this.selectPlanet(id);
+          // Also select in visualization for highlight ring
+          if (window._visualization && window._visualization.selection.bodyIndex !== id) {
+            window._visualization.selectBody(id);
+          }
+        }
+      });
+    });
   }
 
   _renderTech() {

@@ -69,13 +69,13 @@
   flex: 1;
   display: flex;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 8px 12px 8px 200px;
   overflow: hidden;
   /* Don't eat clicks on empty space */
   pointer-events: none;
   /* Panels sit at the top of the available space */
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-end;
   max-height: 50%;
 }
 
@@ -92,6 +92,105 @@
 
 .tycoon-panel.hidden {
   display: none;
+}
+
+/* ── Planet List ──────────────────────────────────────────── */
+
+.tycoon-planet-list {
+  position: absolute;
+  left: 12px;
+  top: 50px;
+  width: 180px;
+  max-height: calc(100% - 120px);
+  z-index: 101;
+}
+
+.planet-list-body {
+  padding: 6px;
+}
+
+.planet-list-star {
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffdd44;
+  border-bottom: 1px solid rgba(255, 221, 68, 0.15);
+  margin-bottom: 4px;
+}
+
+.star-class {
+  display: inline-block;
+  background: rgba(255, 221, 68, 0.15);
+  border: 1px solid rgba(255, 221, 68, 0.3);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 10px;
+  margin-right: 4px;
+  color: #ffdd44;
+}
+
+.planet-list-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border: 1px solid transparent;
+}
+
+.planet-list-item:hover {
+  background: rgba(0, 170, 255, 0.08);
+}
+
+.planet-list-item.selected {
+  background: rgba(0, 170, 255, 0.12);
+  border-color: rgba(0, 170, 255, 0.25);
+}
+
+.planet-list-item.colonized {
+  background: rgba(0, 204, 136, 0.06);
+}
+
+.planet-list-item.colonized.selected {
+  background: rgba(0, 204, 136, 0.14);
+  border-color: rgba(0, 204, 136, 0.3);
+}
+
+.planet-list-item.ejected {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.planet-dot {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.planet-list-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #c0cce0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planet-list-type {
+  font-size: 9px;
+  color: #4a5a70;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.planet-colony-badge,
+.planet-ejected-badge {
+  font-size: 10px;
+  flex-shrink: 0;
 }
 
 .tycoon-planet-panel {
@@ -521,14 +620,24 @@ body.tycoon-active .planet-clickable {
 
 /* Responsive — stack panels on narrow screens */
 @media (max-width: 768px) {
+  .tycoon-planet-list {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: auto;
+    max-height: 150px;
+  }
+
   .tycoon-panels {
     flex-direction: column;
     overflow-y: auto;
+    padding: 8px 12px;
   }
 
   .tycoon-panel {
     flex: none;
-    max-height: 200px;
+    max-height: none;
+    width: auto;
   }
 
   .tycoon-resources {

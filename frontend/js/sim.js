@@ -170,6 +170,8 @@ function setupTycoonUI() {
     if (container) {
         tycoonUI.create(container);
     }
+    // Expose for cross-module access (planet list → visualization highlight)
+    window._visualization = visualization;
 }
 
 function setPauseIcon(playing) {
