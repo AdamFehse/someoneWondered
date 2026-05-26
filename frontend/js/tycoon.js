@@ -254,7 +254,7 @@ export class SpaceTycoon {
       // Stability: based on eccentricity (lower = more stable)
       let stability = 100;
       if (orbitalElem) {
-        const ecc = orbital_elem.eccentricity || 0;
+        const ecc = orbitalElem.eccentricity || 0;
         stability = Math.max(5, Math.round(100 - ecc * 80));
       }
 
