@@ -71,6 +71,12 @@
   gap: 8px;
   padding: 8px 12px;
   overflow: hidden;
+  /* Don't eat clicks on empty space */
+  pointer-events: none;
+  /* Panels sit at the top of the available space */
+  align-items: flex-start;
+  justify-content: center;
+  max-height: 50%;
 }
 
 .tycoon-panel {
@@ -81,6 +87,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  pointer-events: auto;
 }
 
 .tycoon-panel.hidden {
@@ -88,18 +95,18 @@
 }
 
 .tycoon-planet-panel {
-  flex: 1.2;
-  min-width: 220px;
+  width: 280px;
+  max-height: 70%;
 }
 
 .tycoon-tech-panel {
-  flex: 1;
-  min-width: 200px;
+  width: 240px;
+  max-height: 70%;
 }
 
 .tycoon-events-panel {
-  flex: 0.8;
-  min-width: 200px;
+  width: 240px;
+  max-height: 70%;
 }
 
 .panel-header {
@@ -125,6 +132,8 @@
   padding: 10px;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 170, 255, 0.2) transparent;
+  /* Don't eat clicks on empty space above content */
+  pointer-events: auto;
 }
 
 .panel-body::-webkit-scrollbar {
