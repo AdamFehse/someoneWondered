@@ -47,11 +47,11 @@ export class TycoonUI {
     // Cache DOM refs
     this.refs = {
       resourceBar: this.container.querySelector('#tycoon-resources'),
-      planetPanel: this.container.querySelector('#tycoon-planet-panel'),
-      techPanel: this.container.querySelector('#tycoon-tech-panel'),
-      eventLog: this.container.querySelector('#tycoon-events'),
       scoreDisplay: document.getElementById('score-display'),
-      bottomBar: document.getElementById('bottom-bar'),
+      cmdPlanet: this.container.querySelector('#cmd-planet'),
+      cmdActions: this.container.querySelector('#cmd-actions'),
+      cmdTech: this.container.querySelector('#cmd-tech'),
+      cmdLogs: this.container.querySelector('#cmd-logs'),
     };
 
     // Wire up static event listeners
@@ -67,90 +67,7 @@ export class TycoonUI {
     this.tycoon.on('shipArrived', (d) => this._onShipArrived(d));
     this.tycoon.on('planetEjected', (d) => this._onPlanetEjected(d));
 
-    // Make panels draggable and resizable
-    this._initDraggablePanels();
-
     return this.container;
-  }
-
-  _initDraggablePanels() {
-    const panels = this.container.querySelectorAll('.tycoon-panel:not(.tycoon-panel-static)');
-
-    panels.forEach(panel => {
-      // Make absolutely positioned
-      const rect = panel.getBoundingClientRect();
-      panel.style.position = 'absolute';
-      panel.style.left = rect.left + 'px';
-      panel.style.top = rect.top + 'px';
-
-      const header = panel.querySelector('.panel-header');
-      const body = panel.querySelector('.panel-body');
-      if (!header || !body) return;
-
-      // ── Drag ──────────────────────────────────────────────
-      header.style.cursor = 'grab';
-
-      header.addEventListener('pointerdown', (e) => {
-        if (e.target.closest('button')) return; // Don't drag from buttons
-        if (e.target.closest('.panel-resize')) return; // Don't drag from resize handle
-
-        e.preventDefault();
-        header.style.cursor = 'grabbing';
-        panel.style.zIndex = '200';
-
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const origLeft = parseFloat(panel.style.left);
-        const origTop = parseFloat(panel.style.top);
-
-        const onMove = (ev) => {
-          panel.style.left = (origLeft + ev.clientX - startX) + 'px';
-          panel.style.top = (origTop + ev.clientY - startY) + 'px';
-        };
-
-        const onUp = () => {
-          header.style.cursor = 'grab';
-          panel.style.zIndex = '';
-          document.removeEventListener('pointermove', onMove);
-          document.removeEventListener('pointerup', onUp);
-        };
-
-        document.addEventListener('pointermove', onMove);
-        document.addEventListener('pointerup', onUp);
-      });
-
-      // ── Resize ────────────────────────────────────────────
-      const handle = document.createElement('div');
-      handle.className = 'panel-resize';
-      panel.appendChild(handle);
-
-      handle.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const origW = panel.offsetWidth;
-        const origH = panel.offsetHeight;
-        const minW = 150;
-        const minH = 80;
-
-        const onMove = (ev) => {
-          const w = Math.max(minW, origW + (ev.clientX - startX));
-          const h = Math.max(minH, origH + (ev.clientY - startY));
-          panel.style.width = w + 'px';
-          panel.style.height = h + 'px';
-        };
-
-        const onUp = () => {
-          document.removeEventListener('pointermove', onMove);
-          document.removeEventListener('pointerup', onUp);
-        };
-
-        document.addEventListener('pointermove', onMove);
-        document.addEventListener('pointerup', onUp);
-      });
-    });
   }
 
   _template() {
@@ -164,48 +81,21 @@ export class TycoonUI {
         <div class="res-item" data-res="energy"><span class="res-icon">⚡</span><span class="res-val">0</span></div>
       </div>
 
-      <div id="tycoon-planet-list" class="tycoon-panel tycoon-planet-list">
+      <div id="tycoon-planet-list" class="tycoon-planet-list">
         <div class="panel-header"><span>🪐 System</span></div>
-        <div class="panel-body planet-list-body"></div>
+        <div class="planet-list-body"></div>
       </div>
 
-      <div id="tycoon-panels" class="tycoon-panels">
-        <div id="tycoon-planet-panel" class="tycoon-panel tycoon-planet-panel hidden">
-          <div class="panel-header">
-            <span class="panel-planet-name">—</span>
-          </div>
-          <div class="panel-body">
-            <div class="planet-meta"></div>
-            <div class="planet-colony"></div>
-            <div class="planet-buildings"></div>
-            <div class="planet-actions"></div>
-          </div>
-        </div>
-
-        <div id="tycoon-tech-panel" class="tycoon-panel tycoon-tech-panel">
-          <div class="panel-header">
-            <span>🔬 Tech Tree</span>
-          </div>
-          <div class="panel-body tech-tree"></div>
-        </div>
-
-        <div id="tycoon-events" class="tycoon-panel tycoon-events-panel">
-          <div class="panel-header">
-            <span>📜 Events</span>
-          </div>
-          <div class="panel-body events-list"></div>
-        </div>
+      <div id="tycoon-command-bar" class="tycoon-command-bar">
+        <div id="cmd-planet" class="cmd-section"></div>
+        <div id="cmd-actions" class="cmd-section"></div>
+        <div id="cmd-tech" class="cmd-section"></div>
+        <div id="cmd-logs" class="cmd-section"></div>
       </div>`;
   }
 
   _bindEvents() {
-    // Planet panel close
-    const panel = this.container.querySelector('#tycoon-planet-panel');
-    panel?.addEventListener('click', (e) => {
-      if (e.target.classList.contains('close-panel')) {
-        this.deselectPlanet();
-      }
-    });
+    // Nothing to bind at container level — panels wire their own buttons
   }
 
   show() {
@@ -224,12 +114,15 @@ export class TycoonUI {
   _renderAll() {
     this._renderResources();
     this._renderPlanetList();
-    this._renderTech();
-    this._renderEvents();
     this._renderScore();
-    if (this.selectedPlanetId !== null) {
-      this._renderPlanetPanel();
-    }
+    this._renderCommandBar();
+  }
+
+  _renderCommandBar() {
+    this._renderPlanetInfo();
+    this._renderActions();
+    this._renderTech();
+    this._renderLogs();
   }
 
   _renderResources() {
@@ -285,74 +178,6 @@ export class TycoonUI {
     });
   }
 
-  _renderTech() {
-    if (!this.refs.techPanel) return;
-    const container = this.refs.techPanel.querySelector('.tech-tree');
-    if (!container) return;
-
-    const state = this.tycoon.state;
-    if (!state) return;
-
-    container.innerHTML = '';
-
-    for (const tech of TECH_TREE) {
-      const unlocked = state.tech.includes(tech.id);
-      const canAfford = this.tycoon.canAfford(tech.cost);
-
-      const el = document.createElement('div');
-      el.className = `tech-item${unlocked ? ' unlocked' : ''}${canAfford && !unlocked ? ' affordable' : ''}`;
-
-      const costHtml = Object.entries(tech.cost)
-        .map(([res, amt]) => `${RESOURCE_ICONS[res] || ''}${amt}`)
-        .join(' ');
-
-      el.innerHTML = `
-        <div class="tech-info">
-          <span class="tech-emoji">${tech.emoji}</span>
-          <div>
-            <div class="tech-label">${tech.label}</div>
-            <div class="tech-desc">${tech.description}</div>
-          </div>
-        </div>
-        <div class="tech-cost">${costHtml}</div>
-        ${unlocked ? '<div class="tech-status">✓</div>' : `<button class="tech-unlock-btn" data-tech="${tech.id}" ${!canAfford ? 'disabled' : ''}>Unlock</button>`}
-      `;
-
-      if (!unlocked && canAfford) {
-        const btn = el.querySelector('.tech-unlock-btn');
-        btn.addEventListener('click', () => {
-          const result = this.tycoon.unlockTech(tech.id);
-          if (!result.success) {
-            this._toast(result.error);
-          }
-        });
-      }
-
-      container.appendChild(el);
-    }
-  }
-
-  _renderEvents() {
-    if (!this.refs.eventLog) return;
-    const list = this.refs.eventLog.querySelector('.events-list');
-    if (!list || !this.tycoon.state) return;
-
-    const events = this.tycoon.state.events || [];
-    if (events.length === 0) {
-      list.innerHTML = '<div class="event-empty">No events yet. Start playing!</div>';
-      return;
-    }
-
-    // Show last 10 events
-    const recent = events.slice(-10).reverse();
-    list.innerHTML = recent.map(e => `
-      <div class="event-item event-${e.severity || 'info'}">
-        <span class="event-tick">T${e.tick}</span>
-        <span class="event-msg">${e.message}</span>
-      </div>
-    `).join('');
-  }
-
   _renderScore() {
     if (!this.refs.scoreDisplay) return;
     const score = this.tycoon.getScore();
@@ -365,168 +190,173 @@ export class TycoonUI {
 
   selectPlanet(planetId) {
     this.selectedPlanetId = planetId;
-    this._renderPlanetPanel();
-    this.refs.planetPanel?.classList.remove('hidden');
+    this._renderCommandBar();
   }
 
   deselectPlanet() {
     this.selectedPlanetId = null;
-    this.refs.planetPanel?.classList.add('hidden');
+    this._renderCommandBar();
   }
 
-  _renderPlanetPanel() {
-    const panel = this.refs.planetPanel;
-    if (!panel || !this.tycoon.state) return;
-
-    const planet = this.tycoon.state.planets.find(p => p.id === this.selectedPlanetId);
-    if (!planet) {
-      panel.classList.add('hidden');
+  _renderPlanetInfo() {
+    const el = this.refs.cmdPlanet;
+    if (!el) return;
+    if (this.selectedPlanetId === null) {
+      el.innerHTML = '<span class="cmd-section-label">Planet</span><span style="color:#3a4a60;font-size:11px;">Click a planet →</span>';
       return;
     }
+    const planet = this.tycoon.state.planets.find(p => p.id === this.selectedPlanetId);
+    if (!planet) { el.innerHTML = ''; return; }
 
-    panel.classList.remove('hidden');
+    const habColor = planet.stats.habitability > 60 ? 'good' : planet.stats.habitability > 30 ? 'warn' : 'danger';
+    const stabColor = planet.stats.stability > 60 ? 'good' : planet.stats.stability > 30 ? 'warn' : 'danger';
 
-    const metaEl = panel.querySelector('.planet-meta');
-    const colonyEl = panel.querySelector('.planet-colony');
-    const buildingsEl = panel.querySelector('.planet-buildings');
-    const actionsEl = panel.querySelector('.planet-actions');
-    const nameEl = panel.querySelector('.panel-planet-name');
-
-    nameEl.innerHTML = `${planet.type.emoji} ${planet.name}`;
-
-    // Meta info
-    metaEl.innerHTML = `
-      <div class="meta-row"><span>Type</span><span>${planet.type.label}</span></div>
-      <div class="meta-row"><span>Habitability</span><span class="stat-bar"><span class="stat-fill" style="width:${planet.stats.habitability}%"></span>${planet.stats.habitability}%</span></div>
-      <div class="meta-row"><span>Stability</span><span class="stat-bar"><span class="stat-fill${planet.stats.stability < 30 ? ' danger' : planet.stats.stability < 60 ? ' warning' : ''}" style="width:${planet.stats.stability}%"></span>${planet.stats.stability}%</span></div>
-      <div class="meta-row"><span>Mass</span><span>${planet.mass.toFixed(4)} M⊕</span></div>
-      <div class="meta-row"><span>Primary</span><span>${RESOURCE_ICONS[planet.stats.primaryResource]} ${RESOURCE_LABELS[planet.stats.primaryResource]}</span></div>
-      <div class="meta-row"><span>Secondary</span><span>${RESOURCE_ICONS[planet.stats.secondaryResource]} ${RESOURCE_LABELS[planet.stats.secondaryResource]}</span></div>
+    el.innerHTML = `
+      <span class="cmd-section-label">Planet</span>
+      <span style="font-weight:700;color:#fff;font-size:12px;">${planet.type.emoji} ${planet.name}</span>
+      <span style="color:#4a5a60;font-size:10px;">${planet.type.label}</span>
+      <span style="margin-left:8px;font-size:10px;color:#6c7a94;">Hab</span>
+      <div class="stat-bar-wrap"><div class="stat-bar-fill ${habColor}" style="width:${planet.stats.habitability}%"></div></div>
+      <span style="font-size:10px;color:#6c7a94;">Stab</span>
+      <div class="stat-bar-wrap"><div class="stat-bar-fill ${stabColor}" style="width:${planet.stats.stability}%"></div></div>
     `;
+  }
+
+  _renderActions() {
+    const el = this.refs.cmdActions;
+    if (!el) return;
+    if (this.selectedPlanetId === null) {
+      el.innerHTML = '<span class="cmd-section-label">Actions</span>';
+      return;
+    }
+    const planet = this.tycoon.state.planets.find(p => p.id === this.selectedPlanetId);
+    if (!planet) { el.innerHTML = ''; return; }
+
+    let html = '<span class="cmd-section-label">Actions</span>';
 
     if (!planet.colony) {
-      // Uncolonized
-      const costHtml = Object.entries(COLONIZATION_COST)
-        .map(([res, amt]) => `${RESOURCE_ICONS[res]}${amt}`)
-        .join(' ');
       const canAfford = this.tycoon.canAfford(COLONIZATION_COST);
-
-      colonyEl.innerHTML = `<div class="colony-status">Uninhabited</div>`;
-      buildingsEl.innerHTML = '';
-      actionsEl.innerHTML = `
-        <button class="tycoon-btn primary colonize-btn" data-planet="${planet.id}" ${!canAfford ? 'disabled' : ''}>
-          🚀 Colonize — ${costHtml}
-        </button>
-      `;
-
-      const btn = actionsEl.querySelector('.colonize-btn');
-      if (btn && canAfford) {
-        btn.addEventListener('click', () => {
-          const result = this.tycoon.colonizePlanet(planet.id);
-          if (!result.success) this._toast(result.error);
-        });
-      }
-      return;
-    }
-
-    // Colonized
-    const colony = planet.colony;
-    colonyEl.innerHTML = `
-      <div class="colony-status">🏛️ Colony Lv.${colony.level}</div>
-      <div class="colony-pop">👥 Population: ${colony.population}</div>
-      <div class="colony-founded">Founded: T${colony.foundedTick}</div>
-    `;
-
-    // Buildings
-    if (colony.buildings.length > 0) {
-      buildingsEl.innerHTML = '<div class="buildings-label">Buildings:</div>' +
-        colony.buildings.map(bId => {
-          const b = BUILDINGS.find(x => x.id === bId);
-          return `<div class="building-chip">${b?.emoji || ''} ${b?.label || bId}</div>`;
-        }).join('');
+      html += `<button class="cmd-btn primary" data-action="colonize" ${!canAfford ? 'disabled' : ''}>🚀 Colonize</button>`;
     } else {
-      buildingsEl.innerHTML = '<div class="buildings-label empty">No buildings yet</div>';
-    }
-
-    // Build buttons
-    const availableBuildings = BUILDINGS.filter(b => {
-      if (b.id === 'gas_harvester' && planet.type.id !== 'gas_giant') return false;
-      if (b.id === 'trade_hub' && colony.buildings.includes('trade_hub')) return false;
-      return !colony.buildings.includes(b.id);
-    });
-
-    let buildHtml = '';
-    for (const b of availableBuildings) {
-      const costHtml = Object.entries(b.cost).map(([res, amt]) => `${RESOURCE_ICONS[res]}${amt}`).join(' ');
-      const canAfford = this.tycoon.canAfford(b.cost);
-      buildHtml += `<button class="tycoon-btn build-btn" data-planet="${planet.id}" data-building="${b.id}" ${!canAfford ? 'disabled' : ''}>
-        ${b.emoji} ${b.label} — ${costHtml}
-      </button>`;
-    }
-
-    // Trade button
-    const otherColonies = this.tycoon.state.planets.filter(p => p.id !== planet.id && p.colony);
-    let tradeHtml = '';
-    if (colony.buildings.includes('trade_hub') && otherColonies.length > 0) {
-      tradeHtml = '<div class="trade-label">Send trade ship:</div>';
-      for (const target of otherColonies) {
-        tradeHtml += `<button class="tycoon-btn trade-btn" data-from="${planet.id}" data-to="${target.id}">
-          🚀 → ${target.name}
-        </button>`;
+      // Build buttons — show 2-3 at a time
+      const colony = planet.colony;
+      const available = BUILDINGS.filter(b => {
+        if (b.id === 'gas_harvester' && planet.type.id !== 'gas_giant') return false;
+        if (b.id === 'trade_hub' && colony.buildings.includes('trade_hub')) return false;
+        return !colony.buildings.includes(b.id);
+      });
+      for (const b of available.slice(0, 3)) {
+        const canAfford = this.tycoon.canAfford(b.cost);
+        const costStr = Object.entries(b.cost).map(([r, a]) => `${RESOURCE_ICONS[r]}${a}`).join(' ');
+        html += `<button class="cmd-btn" data-action="build" data-building="${b.id}" ${!canAfford ? 'disabled' : ''}>${b.emoji} ${b.label}<span class="cost">${costStr}</span></button>`;
+      }
+      // Trade
+      if (colony.buildings.includes('trade_hub')) {
+        const targets = this.tycoon.state.planets.filter(p => p.id !== planet.id && p.colony);
+        for (const t of targets.slice(0, 2)) {
+          html += `<button class="cmd-btn" data-action="trade" data-target="${t.id}" style="border-color:rgba(255,170,0,0.2);color:#ffcc44;">🚀 → ${t.name}</button>`;
+        }
       }
     }
 
-    actionsEl.innerHTML = `
-      <div class="build-section">${buildHtml || '<div class="no-builds">All buildings constructed</div>'}</div>
-      ${tradeHtml}
-    `;
+    el.innerHTML = html;
 
-    // Wire build buttons
-    actionsEl.querySelectorAll('.build-btn').forEach(btn => {
+    // Wire buttons
+    el.querySelectorAll('[data-action]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const bId = btn.dataset.building;
-        const result = this.tycoon.buildOnPlanet(planet.id, bId);
-        if (!result.success) this._toast(result.error);
+        const action = btn.dataset.action;
+        if (action === 'colonize') {
+          const r = this.tycoon.colonizePlanet(planet.id);
+          if (!r.success) this._toast(r.error);
+        } else if (action === 'build') {
+          const r = this.tycoon.buildOnPlanet(planet.id, btn.dataset.building);
+          if (!r.success) this._toast(r.error);
+        } else if (action === 'trade') {
+          const r = this.tycoon.sendTradeShip(planet.id, parseInt(btn.dataset.target));
+          if (!r.success) this._toast(r.error);
+        }
       });
     });
+  }
 
-    // Wire trade buttons
-    actionsEl.querySelectorAll('.trade-btn').forEach(btn => {
+  _renderTech() {
+    const el = this.refs.cmdTech;
+    if (!el) return;
+    const state = this.tycoon.state;
+    if (!state) return;
+
+    let html = '<span class="cmd-section-label">Research</span>';
+
+    for (const tech of TECH_TREE) {
+      const unlocked = state.tech.includes(tech.id);
+      if (unlocked) continue;
+      const canAfford = this.tycoon.canAfford(tech.cost);
+      const costStr = Object.entries(tech.cost).map(([r, a]) => `${RESOURCE_ICONS[r]}${a}`).join(' ');
+      html += `<button class="cmd-btn${canAfford ? ' primary' : ''}" data-action="tech" data-tech="${tech.id}" ${!canAfford ? 'disabled' : ''} title="${tech.description}">${tech.emoji} ${tech.label}<span class="cost">${costStr}</span></button>`;
+    }
+
+    if (!html.includes('data-action="tech"')) {
+      html += '<span style="color:#3a4a60;font-size:10px;">All researched</span>';
+    }
+
+    el.innerHTML = html;
+
+    el.querySelectorAll('[data-action="tech"]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const fromId = parseInt(btn.dataset.from);
-        const toId = parseInt(btn.dataset.to);
-        const result = this.tycoon.sendTradeShip(fromId, toId);
-        if (!result.success) this._toast(result.error);
+        const r = this.tycoon.unlockTech(btn.dataset.tech);
+        if (!r.success) this._toast(r.error);
       });
     });
+  }
+
+  _renderLogs() {
+    const el = this.refs.cmdLogs;
+    if (!el) return;
+    const events = this.tycoon.state?.events || [];
+
+    let html = '<span class="cmd-section-label">Log</span>';
+    html += '<div style="overflow-y:auto;max-height:40px;flex:1;">';
+
+    if (events.length === 0) {
+      html += '<div style="color:#3a4a60;font-size:10px;padding:2px 0;">No events yet</div>';
+    } else {
+      const recent = events.slice(-5).reverse();
+      for (const e of recent) {
+        const cls = e.severity === 'good' ? 'log-good' : e.severity === 'bad' ? 'log-bad' : e.severity === 'warning' ? 'log-warn' : '';
+        html += `<div class="log-item ${cls}"><span class="log-tick">T${e.tick}</span><span class="log-msg">${e.message}</span></div>`;
+      }
+    }
+
+    html += '</div>';
+    el.innerHTML = html;
   }
 
   // ── Event Handlers ─────────────────────────────────────────
 
   _onColonize(d) {
     this._toast(`🚀 Colonized ${d.planet.name}!`);
-    this._renderPlanetPanel();
     this._renderResources();
     this._renderScore();
+    this._renderCommandBar();
   }
 
   _onBuild(d) {
     this._toast(`🏗️ Built ${d.building.label} on ${d.planet.name}!`);
-    this._renderPlanetPanel();
     this._renderResources();
+    this._renderCommandBar();
   }
 
   _onTech(d) {
     this._toast(`🔬 Unlocked ${d.tech.label}!`);
-    this._renderTech();
     this._renderResources();
     this._renderScore();
+    this._renderCommandBar();
   }
 
   _onEvent(d) {
-    this._renderEvents();
     this._renderResources();
     this._renderScore();
+    this._renderCommandBar();
   }
 
   _onShipSent(d) {
@@ -547,6 +377,7 @@ export class TycoonUI {
       this.deselectPlanet();
     }
     this._renderScore();
+    this._renderPlanetList();
   }
 
   // ── Toast ──────────────────────────────────────────────────

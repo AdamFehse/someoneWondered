@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
    Space Tycoon — UI Styles
+   Clean RTS-style command bar layout
    ═══════════════════════════════════════════════════════════ */
 
 .tycoon-ui {
@@ -18,44 +19,31 @@
   display: none;
 }
 
-.tycoon-ui > * {
-  pointer-events: auto;
-}
-
-/* ── Resource Bar ────────────────────────────────────────── */
+/* ── Resource Pill (top-left, minimal) ────────────────────── */
 
 .tycoon-resources {
+  position: absolute;
+  top: 48px;
+  left: 12px;
   display: flex;
-  gap: 6px;
-  padding: 8px 16px;
-  background: rgba(0, 5, 16, 0.85);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(0, 170, 255, 0.15);
-  flex-shrink: 0;
+  gap: 4px;
+  padding: 6px 8px;
+  background: rgba(4, 8, 20, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 170, 255, 0.12);
+  border-radius: 10px;
+  pointer-events: none;
 }
 
 .res-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 13px;
+  gap: 3px;
+  font-size: 12px;
   font-weight: 600;
-  color: #e0e8ff;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 4px 10px;
-  min-width: 80px;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.res-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.res-icon {
-  font-size: 14px;
+  color: #8a9ab0;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 .res-val {
@@ -63,92 +51,52 @@
   color: #00ccff;
 }
 
-/* ── Panels Container ────────────────────────────────────── */
-
-.tycoon-panels {
-  flex: 1;
-  display: flex;
-  gap: 8px;
-  padding: 8px 12px 8px 200px;
-  overflow: hidden;
-  /* Don't eat clicks on empty space */
-  pointer-events: none;
-  /* Panels sit at the top of the available space */
-  align-items: flex-start;
-  justify-content: flex-end;
-  max-height: 50%;
+.res-icon {
+  font-size: 11px;
 }
 
-.tycoon-panel {
-  background: rgba(0, 5, 16, 0.9);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 170, 255, 0.15);
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  pointer-events: auto;
-  /* For draggable panels */
-  user-select: none;
-  touch-action: none;
-}
-
-.tycoon-panel.hidden {
-  display: none;
-}
-
-/* ── Resize Handle ──────────────────────────────────────── */
-
-.panel-resize {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 14px;
-  height: 14px;
-  cursor: nwse-resize;
-  z-index: 2;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.tycoon-panel:hover .panel-resize {
-  opacity: 1;
-}
-
-.panel-resize::after {
-  content: '';
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 8px;
-  height: 8px;
-  border-right: 2px solid rgba(0, 170, 255, 0.5);
-  border-bottom: 2px solid rgba(0, 170, 255, 0.5);
-  border-radius: 0 0 4px 0;
-}
-
-/* ── Planet List ──────────────────────────────────────────── */
+/* ── Planet Sidebar (left edge, compact) ────────────────── */
 
 .tycoon-planet-list {
   position: absolute;
   left: 12px;
-  top: 50px;
-  width: 180px;
-  max-height: calc(100% - 120px);
-  z-index: 101;
+  top: 100px;
+  width: 160px;
+  bottom: 70px;
+  background: rgba(4, 8, 20, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 170, 255, 0.12);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.tycoon-planet-list .panel-header {
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6c7a94;
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .planet-list-body {
-  padding: 6px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px;
 }
 
 .planet-list-star {
   padding: 6px 8px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #ffdd44;
-  border-bottom: 1px solid rgba(255, 221, 68, 0.15);
-  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 221, 68, 0.1);
+  margin-bottom: 2px;
 }
 
 .star-class {
@@ -156,482 +104,300 @@
   background: rgba(255, 221, 68, 0.15);
   border: 1px solid rgba(255, 221, 68, 0.3);
   border-radius: 3px;
-  padding: 0 4px;
-  font-size: 10px;
-  margin-right: 4px;
-  color: #ffdd44;
+  padding: 0 3px;
+  font-size: 9px;
+  margin-right: 3px;
 }
 
 .planet-list-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: 5px;
+  padding: 5px 6px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.15s;
   border: 1px solid transparent;
+  transition: background 0.1s;
 }
 
 .planet-list-item:hover {
-  background: rgba(0, 170, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .planet-list-item.selected {
-  background: rgba(0, 170, 255, 0.12);
-  border-color: rgba(0, 170, 255, 0.25);
+  background: rgba(0, 170, 255, 0.1);
+  border-color: rgba(0, 170, 255, 0.2);
 }
 
 .planet-list-item.colonized {
-  background: rgba(0, 204, 136, 0.06);
+  border-left: 2px solid #00cc88;
 }
 
 .planet-list-item.colonized.selected {
-  background: rgba(0, 204, 136, 0.14);
-  border-color: rgba(0, 204, 136, 0.3);
+  background: rgba(0, 204, 136, 0.1);
 }
 
 .planet-list-item.ejected {
-  opacity: 0.4;
+  opacity: 0.3;
   text-decoration: line-through;
 }
 
+.planet-dot { font-size: 12px; flex-shrink: 0; }
+.planet-list-name { font-size: 11px; color: #c0cce0; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.planet-list-type { font-size: 8px; color: #3a4a60; text-transform: uppercase; flex-shrink: 0; }
+.planet-colony-badge, .planet-ejected-badge { font-size: 9px; flex-shrink: 0; }
 
+/* ── Bottom Command Bar ─────────────────────────────────── */
 
-.planet-dot {
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.planet-list-name {
-  font-size: 11px;
-  font-weight: 600;
-  color: #c0cce0;
-  flex: 1;
-  min-width: 0;
+.tycoon-command-bar {
+  position: absolute;
+  bottom: 56px;
+  left: 184px;
+  right: 12px;
+  height: 52px;
+  background: rgba(4, 8, 20, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 170, 255, 0.12);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 12px;
+  pointer-events: auto;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.planet-list-type {
-  font-size: 9px;
-  color: #4a5a70;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  flex-shrink: 0;
-}
-
-.planet-colony-badge,
-.planet-ejected-badge {
-  font-size: 10px;
-  flex-shrink: 0;
-}
-
-.tycoon-planet-panel {
-  width: 280px;
-  right: 12px;
-  top: 50px;
-}
-
-.tycoon-tech-panel {
-  width: 240px;
-  right: 12px;
-  top: 300px;
-}
-
-.tycoon-events-panel {
-  width: 240px;
-  left: 210px;
-  bottom: 60px;
-}
-
-.panel-header {
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #00ccff;
-  background: rgba(0, 170, 255, 0.06);
-  border-bottom: 1px solid rgba(0, 170, 255, 0.12);
+.cmd-section {
   display: flex;
   align-items: center;
   gap: 6px;
+  height: 100%;
+  padding: 0 8px;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.panel-planet-name {
-  font-size: 14px;
+.cmd-section:last-child {
+  border-right: none;
+}
+
+.cmd-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #3a4a60;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.cmd-btn {
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #8a9ab0;
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.cmd-btn:hover:not(:disabled) {
+  background: rgba(0, 170, 255, 0.1);
+  border-color: rgba(0, 170, 255, 0.25);
   color: #fff;
 }
 
-.panel-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 170, 255, 0.2) transparent;
-  /* Don't eat clicks on empty space above content */
+.cmd-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.cmd-btn.primary {
+  background: rgba(0, 204, 136, 0.1);
+  border-color: rgba(0, 204, 136, 0.25);
+  color: #00ffaa;
+}
+
+.cmd-btn.primary:hover:not(:disabled) {
+  background: rgba(0, 204, 136, 0.2);
+  border-color: rgba(0, 204, 136, 0.4);
+}
+
+.cmd-btn .cost {
+  display: block;
+  font-size: 8px;
+  font-weight: 500;
+  color: #4a5a60;
+  margin-top: 1px;
+}
+
+/* ── Planet Detail Overlay ───────────────────────────────── */
+
+.tycoon-detail {
+  position: absolute;
+  top: 100px;
+  right: 12px;
+  width: 260px;
+  max-height: calc(100% - 180px);
+  background: rgba(4, 8, 20, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 170, 255, 0.12);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   pointer-events: auto;
 }
 
-.panel-body::-webkit-scrollbar {
-  width: 6px;
+.tycoon-detail.hidden {
+  display: none;
 }
 
-.panel-body::-webkit-scrollbar-thumb {
-  background: rgba(0, 170, 255, 0.2);
-  border-radius: 3px;
+.tycoon-detail .panel-header {
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* ── Planet Meta ──────────────────────────────────────────── */
+.detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 170, 255, 0.15) transparent;
+}
+
+.detail-body::-webkit-scrollbar { width: 4px; }
+.detail-body::-webkit-scrollbar-thumb { background: rgba(0, 170, 255, 0.15); border-radius: 2px; }
+
+/* ── Panel Header ────────────────────────────────────────── */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* ── Stat Bars ───────────────────────────────────────────── */
 
 .meta-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 3px 0;
-  font-size: 12px;
-  color: #b0bcd4;
-}
-
-.meta-row span:first-child {
-  color: #6c7a94;
-  font-weight: 500;
-}
-
-.stat-bar {
-  display: flex !important;
-  align-items: center;
-  gap: 4px;
-  position: relative;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
-  height: 14px;
-  width: 100px;
-  overflow: hidden;
-}
-
-.stat-fill {
-  display: block !important;
-  height: 100%;
-  background: linear-gradient(90deg, #00cc88, #00ffaa);
-  border-radius: 4px;
-  min-width: 2px;
-  transition: width 0.3s;
-}
-
-.stat-fill.warning {
-  background: linear-gradient(90deg, #ffaa00, #ffcc44);
-}
-
-.stat-fill.danger {
-  background: linear-gradient(90deg, #ff4444, #ff6666);
-}
-
-/* ── Colony Info ──────────────────────────────────────────── */
-
-.colony-status {
-  font-weight: 700;
-  font-size: 14px;
-  color: #00ffaa;
-  margin: 6px 0 2px;
-}
-
-.colony-pop,
-.colony-founded {
-  font-size: 12px;
+  padding: 2px 0;
+  font-size: 11px;
   color: #8a9ab0;
 }
 
-/* ── Buildings ────────────────────────────────────────────── */
-
-.buildings-label {
-  font-size: 11px;
-  color: #6c7a94;
-  font-weight: 600;
-  margin-top: 10px;
+.meta-row .label {
+  color: #4a5a60;
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.buildings-label.empty {
-  color: #4a5568;
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.building-chip {
-  display: inline-block;
-  background: rgba(0, 170, 255, 0.1);
-  border: 1px solid rgba(0, 170, 255, 0.2);
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-size: 11px;
-  color: #88ccff;
-  margin: 2px 4px 2px 0;
-}
-
-/* ── Buttons ──────────────────────────────────────────────── */
-
-.tycoon-btn {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 8px 10px;
-  margin: 4px 0;
-  font-size: 12px;
+  letter-spacing: 0.04em;
   font-weight: 600;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: #c0cce0;
-  cursor: pointer;
-  transition: all 0.15s;
 }
 
-.tycoon-btn:hover:not(:disabled) {
-  background: rgba(0, 170, 255, 0.12);
-  border-color: rgba(0, 170, 255, 0.3);
-  color: #fff;
+.stat-bar-wrap {
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  height: 10px;
+  width: 90px;
+  overflow: hidden;
 }
 
-.tycoon-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+  min-width: 2px;
 }
 
-.tycoon-btn.primary {
-  background: rgba(0, 204, 136, 0.12);
-  border-color: rgba(0, 204, 136, 0.3);
-  color: #00ffaa;
-  text-align: center;
-  font-size: 13px;
+.stat-bar-fill.good { background: linear-gradient(90deg, #00cc88, #00ffaa); }
+.stat-bar-fill.warn { background: linear-gradient(90deg, #ffaa00, #ffcc44); }
+.stat-bar-fill.danger { background: linear-gradient(90deg, #ff4444, #ff6666); }
+
+/* ── Logs ────────────────────────────────────────────────── */
+
+.log-section {
+  font-size: 10px;
+  line-height: 1.5;
 }
 
-.tycoon-btn.primary:hover:not(:disabled) {
-  background: rgba(0, 204, 136, 0.22);
-  border-color: rgba(0, 204, 136, 0.5);
-}
-
-.build-section {
-  margin-top: 8px;
-}
-
-.no-builds {
-  font-size: 11px;
-  color: #4a5568;
-  font-style: italic;
-  text-align: center;
-  padding: 8px;
-}
-
-.trade-label {
-  font-size: 11px;
-  color: #6c7a94;
-  font-weight: 600;
-  margin-top: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.tycoon-btn.trade-btn {
-  background: rgba(255, 170, 0, 0.08);
-  border-color: rgba(255, 170, 0, 0.2);
-  color: #ffcc44;
-  font-size: 11px;
-  padding: 6px 8px;
-}
-
-.tycoon-btn.trade-btn:hover:not(:disabled) {
-  background: rgba(255, 170, 0, 0.16);
-  border-color: rgba(255, 170, 0, 0.4);
-}
-
-/* ── Tech Tree ────────────────────────────────────────────── */
-
-.tech-item {
+.log-item {
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin: 1px 0;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 6px;
-  margin: 3px 0;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid transparent;
-  transition: all 0.15s;
-}
-
-.tech-item:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.tech-item.affordable {
-  border-color: rgba(0, 204, 136, 0.25);
-  background: rgba(0, 204, 136, 0.04);
-}
-
-.tech-item.unlocked {
-  background: rgba(0, 204, 136, 0.08);
-  border-color: rgba(0, 204, 136, 0.2);
-}
-
-.tech-info {
-  flex: 1;
-  display: flex;
-  align-items: center;
   gap: 6px;
 }
 
-.tech-emoji {
-  font-size: 18px;
-}
-
-.tech-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #e0e8ff;
-}
-
-.tech-desc {
-  font-size: 10px;
-  color: #6c7a94;
-  margin-top: 1px;
-}
-
-.tech-cost {
-  font-size: 11px;
-  color: #8899aa;
-  white-space: nowrap;
-}
-
-.tech-status {
-  font-size: 16px;
-  color: #00ffaa;
+.log-tick {
+  color: #3a4a60;
   font-weight: 700;
+  font-size: 9px;
+  flex-shrink: 0;
 }
 
-.tech-unlock-btn {
-  padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 700;
-  background: rgba(0, 204, 136, 0.15);
-  border: 1px solid rgba(0, 204, 136, 0.3);
-  color: #00ffaa;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
+.log-msg {
+  color: #8a9ab0;
 }
 
-.tech-unlock-btn:hover:not(:disabled) {
-  background: rgba(0, 204, 136, 0.3);
-}
+.log-good .log-msg { color: #66bb99; }
+.log-warn .log-msg { color: #ccaa66; }
+.log-bad .log-msg { color: #cc6666; }
 
-.tech-unlock-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-/* ── Event Log ────────────────────────────────────────────── */
-
-.event-empty {
-  font-size: 12px;
-  color: #4a5568;
-  text-align: center;
-  padding: 16px;
-  font-style: italic;
-}
-
-.event-item {
-  padding: 6px 8px;
-  border-radius: 4px;
-  margin: 2px 0;
-  font-size: 11px;
-  line-height: 1.4;
-  border-left: 2px solid transparent;
-}
-
-.event-good {
-  background: rgba(0, 204, 136, 0.06);
-  border-left-color: #00cc88;
-  color: #88ddbb;
-}
-
-.event-warning {
-  background: rgba(255, 170, 0, 0.06);
-  border-left-color: #ffaa00;
-  color: #ddbb88;
-}
-
-.event-bad {
-  background: rgba(255, 68, 68, 0.06);
-  border-left-color: #ff4444;
-  color: #dd8888;
-}
-
-.event-info {
-  background: rgba(0, 170, 255, 0.06);
-  border-left-color: #00aaff;
-  color: #88bbdd;
-}
-
-.event-tick {
-  font-weight: 700;
-  color: #4a5568;
-  margin-right: 4px;
-  font-size: 10px;
-}
-
-.event-msg {
-  color: #b0bcd4;
-}
-
-/* ── Score Display ────────────────────────────────────────── */
+/* ── Score Display ───────────────────────────────────────── */
 
 #score-display {
-    margin-left: auto;
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-#score-display.hidden {
-    display: none;
-}
+#score-display.hidden { display: none; }
 
 .score-main {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #ffdd44;
-    text-shadow: 0 0 12px rgba(255, 221, 68, 0.4);
-    font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffdd44;
+  text-shadow: 0 0 8px rgba(255, 221, 68, 0.3);
+  font-variant-numeric: tabular-nums;
 }
 
 .score-detail {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.4);
-    font-variant-numeric: tabular-nums;
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  font-variant-numeric: tabular-nums;
 }
 
-/* ── Toast ────────────────────────────────────────────────── */
+/* ── Toast ───────────────────────────────────────────────── */
 
 .tycoon-toast {
   position: absolute;
-  bottom: 90px;
+  bottom: 120px;
   left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: rgba(0, 20, 40, 0.92);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 170, 255, 0.25);
-  border-radius: 10px;
-  padding: 10px 20px;
-  font-size: 13px;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(0, 15, 30, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 170, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 12px;
   font-weight: 600;
-  color: #e0e8ff;
+  color: #c0cce0;
   white-space: nowrap;
   z-index: 200;
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   pointer-events: none;
 }
 
@@ -640,57 +406,89 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* ── Sim Page Integration ────────────────────────────────── */
+/* ── Tech tree inside detail panel ───────────────────────── */
 
-/* When tycoon mode is active, adjust bottom bar */
-body.tycoon-active #bottom-bar {
-  bottom: 0;
+.tech-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  margin: 2px 0;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid transparent;
 }
 
-body.tycoon-active #tycoon-ui ~ #bottom-bar {
-  /* bottom bar stays but tycoon panels sit above it */
+.tech-item.affordable {
+  border-color: rgba(0, 204, 136, 0.2);
+  background: rgba(0, 204, 136, 0.03);
 }
 
-/* Planet selection ring in tycoon mode — planets glow */
-body.tycoon-active .planet-clickable {
+.tech-item.unlocked {
+  background: rgba(0, 204, 136, 0.06);
+  border-color: rgba(0, 204, 136, 0.15);
+}
+
+.tech-emoji { font-size: 16px; }
+.tech-label { font-size: 11px; font-weight: 600; color: #c0cce0; }
+.tech-desc { font-size: 9px; color: #4a5a60; line-height: 1.3; }
+.tech-cost { font-size: 9px; color: #5a6a80; white-space: nowrap; }
+.tech-status { font-size: 14px; color: #00ffaa; font-weight: 700; }
+
+.tech-unlock-btn {
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(0, 204, 136, 0.12);
+  border: 1px solid rgba(0, 204, 136, 0.25);
+  color: #00ffaa;
+  border-radius: 4px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
-/* Responsive — stack panels on narrow screens */
-@media (max-width: 768px) {
+.tech-unlock-btn:hover:not(:disabled) { background: rgba(0, 204, 136, 0.25); }
+.tech-unlock-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── Buildings ───────────────────────────────────────────── */
+
+.building-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(0, 170, 255, 0.08);
+  border: 1px solid rgba(0, 170, 255, 0.15);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+  color: #88bbdd;
+  margin: 2px 3px 2px 0;
+}
+
+.colony-status {
+  font-size: 13px;
+  font-weight: 700;
+  color: #00ffaa;
+  margin: 4px 0;
+}
+
+.colony-pop, .colony-founded {
+  font-size: 10px;
+  color: #5a6a80;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+
+@media (max-width: 800px) {
   .tycoon-planet-list {
-    position: relative;
-    left: auto;
-    top: auto;
-    width: auto;
-    max-height: 150px;
+    width: 130px;
   }
-
-  .tycoon-panels {
-    flex-direction: column;
-    overflow-y: auto;
-    padding: 8px 12px;
+  .tycoon-command-bar {
+    left: 154px;
   }
-
-  .tycoon-panel {
-    flex: none;
-    max-height: none;
-    width: auto;
+  .tycoon-detail {
+    width: 220px;
   }
-
-  .tycoon-resources {
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 6px 10px;
-  }
-
-  .res-item {
-    font-size: 11px;
-    padding: 3px 8px;
-    min-width: 60px;
-  }
-
-  .res-icon {
-    font-size: 12px;
-  }
+  .cmd-section-label { display: none; }
+  .cmd-btn { font-size: 10px; padding: 5px 7px; }
 }
