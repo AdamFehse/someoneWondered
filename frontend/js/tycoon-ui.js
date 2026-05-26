@@ -67,7 +67,90 @@ export class TycoonUI {
     this.tycoon.on('shipArrived', (d) => this._onShipArrived(d));
     this.tycoon.on('planetEjected', (d) => this._onPlanetEjected(d));
 
+    // Make panels draggable and resizable
+    this._initDraggablePanels();
+
     return this.container;
+  }
+
+  _initDraggablePanels() {
+    const panels = this.container.querySelectorAll('.tycoon-panel:not(.tycoon-panel-static)');
+
+    panels.forEach(panel => {
+      // Make absolutely positioned
+      const rect = panel.getBoundingClientRect();
+      panel.style.position = 'absolute';
+      panel.style.left = rect.left + 'px';
+      panel.style.top = rect.top + 'px';
+
+      const header = panel.querySelector('.panel-header');
+      const body = panel.querySelector('.panel-body');
+      if (!header || !body) return;
+
+      // ── Drag ──────────────────────────────────────────────
+      header.style.cursor = 'grab';
+
+      header.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('button')) return; // Don't drag from buttons
+        if (e.target.closest('.panel-resize')) return; // Don't drag from resize handle
+
+        e.preventDefault();
+        header.style.cursor = 'grabbing';
+        panel.style.zIndex = '200';
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const origLeft = parseFloat(panel.style.left);
+        const origTop = parseFloat(panel.style.top);
+
+        const onMove = (ev) => {
+          panel.style.left = (origLeft + ev.clientX - startX) + 'px';
+          panel.style.top = (origTop + ev.clientY - startY) + 'px';
+        };
+
+        const onUp = () => {
+          header.style.cursor = 'grab';
+          panel.style.zIndex = '';
+          document.removeEventListener('pointermove', onMove);
+          document.removeEventListener('pointerup', onUp);
+        };
+
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp);
+      });
+
+      // ── Resize ────────────────────────────────────────────
+      const handle = document.createElement('div');
+      handle.className = 'panel-resize';
+      panel.appendChild(handle);
+
+      handle.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const origW = panel.offsetWidth;
+        const origH = panel.offsetHeight;
+        const minW = 150;
+        const minH = 80;
+
+        const onMove = (ev) => {
+          const w = Math.max(minW, origW + (ev.clientX - startX));
+          const h = Math.max(minH, origH + (ev.clientY - startY));
+          panel.style.width = w + 'px';
+          panel.style.height = h + 'px';
+        };
+
+        const onUp = () => {
+          document.removeEventListener('pointermove', onMove);
+          document.removeEventListener('pointerup', onUp);
+        };
+
+        document.addEventListener('pointermove', onMove);
+        document.addEventListener('pointerup', onUp);
+      });
+    });
   }
 
   _template() {

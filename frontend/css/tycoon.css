@@ -88,10 +88,43 @@
   display: flex;
   flex-direction: column;
   pointer-events: auto;
+  /* For draggable panels */
+  user-select: none;
+  touch-action: none;
 }
 
 .tycoon-panel.hidden {
   display: none;
+}
+
+/* ── Resize Handle ──────────────────────────────────────── */
+
+.panel-resize {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.tycoon-panel:hover .panel-resize {
+  opacity: 1;
+}
+
+.panel-resize::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid rgba(0, 170, 255, 0.5);
+  border-bottom: 2px solid rgba(0, 170, 255, 0.5);
+  border-radius: 0 0 4px 0;
 }
 
 /* ── Planet List ──────────────────────────────────────────── */
@@ -197,17 +230,20 @@
 
 .tycoon-planet-panel {
   width: 280px;
-  max-height: 70%;
+  right: 12px;
+  top: 50px;
 }
 
 .tycoon-tech-panel {
   width: 240px;
-  max-height: 70%;
+  right: 12px;
+  top: 300px;
 }
 
 .tycoon-events-panel {
   width: 240px;
-  max-height: 70%;
+  left: 210px;
+  bottom: 60px;
 }
 
 .panel-header {
