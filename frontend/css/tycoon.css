@@ -164,7 +164,19 @@
   padding: 0 12px;
   gap: 12px;
   pointer-events: auto;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 170, 255, 0.2) transparent;
+}
+
+.tycoon-command-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tycoon-command-bar::-webkit-scrollbar-thumb {
+  background: rgba(0, 170, 255, 0.2);
+  border-radius: 2px;
 }
 
 .cmd-section {
