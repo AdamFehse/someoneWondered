@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merch Configurator — Someone Wondered</title>
+    <link rel="icon" href="./assets/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <div class="header-left">
+                <h1>✨ someone wondered</h1>
+                <span class="tag">merch configurator</span>
+            </div>
+            <a href="./index.html" class="nav-link">space sim</a>
+        </header>
+
+        <main>
+            <div id="shirt-preview">
+                <div id="three-canvas"></div>
+            </div>
+
+            <div id="controls">
+                <div class="card">
+                    <div class="card-row">
+                        <div class="field">
+                            <label>Shirt color</label>
+                            <input type="color" id="shirt-color" value="#1a1a2e">
+                        </div>
+                        <div class="field">
+                            <label>Text color</label>
+                            <input type="color" id="text-color" value="#ffffff">
+                        </div>
+                    </div>
+
+                    <div class="card-row">
+                        <div class="field">
+                            <label>Custom text</label>
+                            <input type="text" id="shirt-text" value="ULM" maxlength="20" placeholder="Your text here">
+                        </div>
+                    </div>
+
+                    <div class="card-row">
+                        <div class="field">
+                            <label>Size</label>
+                            <div class="sizes">
+                                <button class="size-btn" data-size="S">S</button>
+                                <button class="size-btn" data-size="M">M</button>
+                                <button class="size-btn active" data-size="L">L</button>
+                                <button class="size-btn" data-size="XL">XL</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="add-to-cart">🛒 Add to Cart — $29.99</button>
+                </div>
+            </div>
+        </main>
+
+        <div id="toast" class="hidden"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="./js/main.js"></script>
+</body>
+</html>
